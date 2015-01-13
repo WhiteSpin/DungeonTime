@@ -33,7 +33,7 @@ uint64_t Terminal::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {
 }
 
 bool Terminal::isCSI(uint8_t* buffer) {
-	return strncmp(CSI, (const char*)buffer, sizeof(CSI)-1) == 0;
+	return strncmp(CSI, (const char*)buffer, 2) == 0;
 }
 
 Terminal term;

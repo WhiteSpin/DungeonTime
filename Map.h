@@ -7,7 +7,7 @@
 class Map {
 	public:
 	uint64_t width, height;
-	uint8_t* background;
+	std::unique_ptr<uint8_t> background;
 	std::vector<std::unique_ptr<Entity>> entities;
 	Map();
 	~Map();

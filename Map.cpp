@@ -9,14 +9,14 @@ Map::Map() :width(64), height(32), background((uint8_t*)malloc(width * height)) 
 }
 
 Map::~Map() {
-	free(background);
+
 }
 
 void Map::render() {
 	term.setCursorPosition(0, 0);
 	for(uint64_t y = 0; y < height; y ++) {
 		for(uint64_t x = 0; x < width; x ++) {
-			fwrite(&background[y*width+x], 1, 1, stdout);
+			fwrite(background.get()+y*width+x, 1, 1, stdout);
 		}
 		//fwrite(&background[y*width], 1, width, stdout);
 		printf("\n");
@@ -24,11 +24,11 @@ void Map::render() {
 }
 
 uint8_t Map::getBackgroundAt(uint64_t posX, uint64_t posY) {
-	return background[posY*width+posX];
+	return *(background.get()+posY*width+posX);
 }
 
 bool Map::replaceBackgroundCell(uint8_t type, uint64_t posX, uint64_t posY) {
-	uint8_t* ptr = background+posY*width+posX;
+	uint8_t* ptr = background.get()+posY*width+posX;
 	switch(*ptr) {
 		case BACKGROUD_FLOOR:
 		return false;
@@ -88,7 +88,7 @@ void Map::generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h
 }
 
 void Map::generate() {
-	memset(background, BACKGROUD_EMPTY, width * height);
+	memset(background.get(), BACKGROUD_EMPTY, width * height);
 	generateXSplitRoom(8, 4, 15, 9);
 	generateYSplitRoom(32, 4, 15, 9);
 	generateXCorridor(22, 5, 11, 3);

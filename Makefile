@@ -1,6 +1,6 @@
-CPPOPTIONS := -O3 -std=c++1y -stdlib=libc++
+CXX_CFLAGS = -O3 -std=c++1y -stdlib=libc++
 
 all:
-	clang++ ${CPPOPTIONS}\
+	$(CXX) $(CXX_CFLAGS) \
 		-o main\
 		*.cpp

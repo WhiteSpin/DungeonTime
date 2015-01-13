@@ -1,16 +1,6 @@
 #include "Map.h"
 
 int main(int argc, const char** argv) {
-	struct termios old = {0};
-	if(tcgetattr(0, &old) < 0)
-		perror("tcsetattr()");
-	old.c_lflag &= ~ICANON;
-	old.c_lflag &= ~ECHO;
-	old.c_cc[VMIN] = 1;
-	old.c_cc[VTIME] = 0;
-	if(tcsetattr(0, TCSANOW, &old) < 0)
-		perror("tcsetattr ICANON");
-
 	map.generate();
 	Entity hero;
 	hero.posX = 17;
@@ -18,12 +8,12 @@ int main(int argc, const char** argv) {
 
 	while(true) {
 		uint8_t buffer[16];
-		uint64_t readBytes = handleKeyboard(sizeof(buffer), buffer);
-		if(readBytes == 3 && buffer[0] == 27 && buffer[1] == 91) {
+		uint64_t readBytes = term.handleKeyboard(sizeof(buffer), buffer);
+		if(readBytes == 3 && term.isCSI(buffer)) {
 			hero.handleControl(buffer[2]);
 		}
 		map.render();
-		setCursorPosition(hero.posX, hero.posY);
+		term.setCursorPosition(hero.posX, hero.posY);
 		fflush(stdout);
 
 		usleep(50000);

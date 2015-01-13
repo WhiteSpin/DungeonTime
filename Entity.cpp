@@ -8,29 +8,29 @@ bool Entity::canEnter(uint64_t posX, uint64_t posY) {
 	return map.getBackgroundAt(posX, posY) == BACKGROUD_FLOOR;
 }
 
-bool Entity::handleControl(uint8_t input) {
+bool Entity::moveControl(uint8_t input) {
 	switch(input) {
-		case 65:
+		case Up:
 		if(posY > 0 && canEnter(posX, posY-1)) {
 			posY --;
 			return true;
 		}
 		return false;
-		case 66:
+		case Down:
 		if(posY < map.height-1 && canEnter(posX, posY+1)) {
 			posY ++;
 			return true;
 		}
 		return false;
-		case 67:
-		if(posX < map.width-1 && canEnter(posX+1, posY)) {
-			posX ++;
+		case Left:
+		if(posX > 0 && canEnter(posX-1, posY)) {
+			posX --;
 			return true;
 		}
 		return false;
-		case 68:
-		if(posX > 0 && canEnter(posX-1, posY)) {
-			posX --;
+		case Right:
+		if(posX < map.width-1 && canEnter(posX+1, posY)) {
+			posX ++;
 			return true;
 		}
 		return false;

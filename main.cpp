@@ -1,17 +1,33 @@
 #include "Map.h"
 
+uint8_t moveKeyBinding[128];
+
 int main(int argc, const char** argv) {
+	memset(moveKeyBinding, 0, sizeof(moveKeyBinding));
+	moveKeyBinding['A'] = Up;
+	moveKeyBinding['B'] = Down;
+	moveKeyBinding['C'] = Right;
+	moveKeyBinding['D'] = Left;
+	moveKeyBinding['k'] = Up;
+	moveKeyBinding['j'] = Down;
+	moveKeyBinding['l'] = Right;
+	moveKeyBinding['h'] = Left;
+
 	map.generate();
 	Entity hero;
 	hero.posX = 17;
 	hero.posY = 10;
 
 	while(true) {
-		uint8_t buffer[16];
+		uint8_t buffer[16], moveDir;
 		uint64_t readBytes = term.handleKeyboard(sizeof(buffer), buffer);
-		if(readBytes == 3 && term.isCSI(buffer)) {
-			hero.handleControl(buffer[2]);
-		}
+		if(readBytes == 3 && term.isCSI(buffer))
+			moveDir = moveKeyBinding[buffer[2]];
+		else if(readBytes == 1)
+			moveDir = moveKeyBinding[buffer[0]];
+		if(readBytes && moveDir)
+			hero.moveControl(moveDir);
+
 		map.render();
 		term.setCursorPosition(hero.posX, hero.posY);
 		fflush(stdout);

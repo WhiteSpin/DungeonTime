@@ -37,3 +37,8 @@ bool Entity::moveControl(uint8_t input) {
 	}
 	return false;
 }
+
+bool Entity::keyControl(uint8_t input) {
+	messages.push_back(std::unique_ptr<Message>(new Message("Not An Arrow to the knee")));
+	return false;
+}

@@ -1,27 +1,28 @@
 #include "Terminal.h"
 
+struct termios original;
 static const char* CSI = "\33[";
 
-void signalHandler(int signum) {
-	Terminal::cleanScreen();
+void Terminal::init() {
+	tcgetattr(0, &original);
+	signal(SIGINT, (void(*)(int))Terminal::terminate);
+
+	struct termios aux;
+	tcgetattr(0, &aux);
+	aux.c_lflag &= ~ICANON;
+	aux.c_lflag &= ~ECHO;
+	aux.c_cc[VMIN] = 1;
+	aux.c_cc[VTIME] = 0;
+	tcsetattr(0, TCSANOW, &aux);
+}
+
+void Terminal::terminate() {
+	Terminal::clearScreen();
+	tcsetattr(0, TCSANOW, &original);
 	exit(0);
 }
 
-void Terminal::init() {
-	//signal(SIGINT, signalHandler);
-
-	struct termios old;
-	if(tcgetattr(0, &old) < 0)
-		perror("tcsetattr()");
-	old.c_lflag &= ~ICANON;
-	old.c_lflag &= ~ECHO;
-	old.c_cc[VMIN] = 1;
-	old.c_cc[VTIME] = 0;
-	if(tcsetattr(0, TCSANOW, &old) < 0)
-		perror("tcsetattr ICANON");
-}
-
-void Terminal::cleanScreen() {
+void Terminal::clearScreen() {
 	Terminal::setCursorPosition(0, 0);
 	printf("%s0J", CSI);
 }
@@ -38,6 +39,7 @@ uint64_t Terminal::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
 	select(STDIN_FILENO+1, &readset, NULL, NULL, &tv);
+	
 	if(FD_ISSET(STDIN_FILENO, &readset))
 		return read(STDIN_FILENO, buffer, bufferSize);
 	else

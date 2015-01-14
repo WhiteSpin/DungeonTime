@@ -27,10 +27,24 @@ int main(int argc, const char** argv) {
 			moveDir = moveKeyBinding[buffer[2]];
 		else if(readBytes == 1)
 			moveDir = moveKeyBinding[buffer[0]];
-		if(readBytes && moveDir)
-			hero.moveControl(moveDir);
+		if(readBytes){
+			if(moveDir)
+				hero.moveControl(moveDir);
+			else {
+				hero.keyControl(buffer[0]);
+			}
+		}
 
+		Terminal::clearScreen();
 		map.render();
+		Terminal::setCursorPosition(hero.posX, hero.posY);
+		for(uint64_t i = 0; i < messages.size(); ++i) {
+			messages[i]->render();
+			if(messages[i]->lifeTime <= 0.0)
+				messages.erase(messages.begin() + i--);
+			// messages[i][0].render();
+			// (*messages[i]).render();
+		}
 		Terminal::setCursorPosition(hero.posX, hero.posY);
 		fflush(stdout);
 

@@ -1,12 +1,12 @@
-ifeq ($(CC),clang)
-CSTD = -std=c++1y -stdlib=libc++
+ifeq ($(UNAME), Linux)
+CSTD = -std=c++1y -stdlib=libc++ -l cxxrt
 else
-CSTD = -std=c++1y
+CSTD = -std=c++1y -stdlib=libc++
 endif
+
 CXX_CFLAGS = -O3 $(CSTD)
-#LINK = -l cxxrt
 
 all:
-	$(CXX) $(CXX_CFLAGS)\
+	clang++ $(CXX_CFLAGS)\
 		-o main\
 		*.cpp

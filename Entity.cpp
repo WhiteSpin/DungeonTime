@@ -35,6 +35,6 @@ bool Entity::handleAction(Action input) {
 		}
 		return false;
 	}
-	messages.push_back(std::unique_ptr<Message>(new Message("Not An Arrow to the knee")));
+	Message::push(std::string("Not An Arrow to the knee"));
 	return false;
 }

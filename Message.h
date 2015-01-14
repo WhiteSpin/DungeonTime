@@ -4,8 +4,9 @@ class Message {
     public:
     std::string text;
     float lifeTime;
-    Message(const char* text);
-    static void doFrame();
-};
+    Message(const std::string& text);
 
-extern std::vector<std::unique_ptr<Message>> messages;
+    static std::vector<std::unique_ptr<Message>> list;
+    static void doFrame();
+    static void push(const std::string& text);
+};

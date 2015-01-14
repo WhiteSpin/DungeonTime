@@ -4,6 +4,8 @@
 #define BACKGROUD_FLOOR '.'
 #define BACKGROUD_CORRIDOR '#'
 
+Map map;
+
 Map::Map() :width(64), height(32), background((uint8_t*)malloc(width * height)) {
 
 }
@@ -94,5 +96,3 @@ void Map::generate() {
 	//generateRoom(8, 2, 9, 4);
 	//generateRoom(8, 2, 9, 4);
 }
-
-Map map;

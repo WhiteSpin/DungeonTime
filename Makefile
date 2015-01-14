@@ -1,3 +1,5 @@
+UNAME = $(shell uname)
+
 ifeq ($(UNAME), Linux)
 CSTD = -std=c++1y -stdlib=libc++ -l cxxrt
 else

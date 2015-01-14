@@ -1,33 +1,43 @@
-#include "Controls.h"
+#include "Level.h"
 
 uint8_t asciiKeyBinding[128];
 uint8_t ansiKeyBinding[128];
-Entity* hero;
+const char* inventorySlotNames[] = {
+	"Right Hand",	//0: Weapon
+	"Left Hand",	//1: Shield
+	"Back",			//2: Backpack
+	"Waist",		//3: Any Item
+	"Head",			//4: Helmet
+	"Hands",		//5: Gloves
+	"Chest",		//6: Upper Amor
+	"Legs",			//7: Lower Amor
+	"Feet"			//8: Shoes
+};
 
 void Controls::init() {
 	memset(asciiKeyBinding, 0, sizeof(asciiKeyBinding));
-	asciiKeyBinding['k'] = Entity::MoveUp;
-	asciiKeyBinding['j'] = Entity::MoveDown;
-	asciiKeyBinding['l'] = Entity::MoveRight;
-	asciiKeyBinding['h'] = Entity::MoveLeft;
+	asciiKeyBinding['k'] = Controls::Up;
+	asciiKeyBinding['j'] = Controls::Down;
+	asciiKeyBinding['l'] = Controls::Right;
+	asciiKeyBinding['h'] = Controls::Left;
 
 	memset(ansiKeyBinding, 0, sizeof(ansiKeyBinding));
-	ansiKeyBinding['A'] = Entity::MoveUp;
-	ansiKeyBinding['B'] = Entity::MoveDown;
-	ansiKeyBinding['C'] = Entity::MoveRight;
-	ansiKeyBinding['D'] = Entity::MoveLeft;
-
-	hero = new Entity(level.get(), 17, 10);
+	ansiKeyBinding['A'] = Controls::Up;
+	ansiKeyBinding['B'] = Controls::Down;
+	ansiKeyBinding['C'] = Controls::Right;
+	ansiKeyBinding['D'] = Controls::Left;
 }
 
 void Controls::doFrame() {
-	Entity::Action action;
+	Controls::Action action;
 	uint8_t buffer[16];
 	uint64_t readBytes = System::handleKeyboard(sizeof(buffer), buffer);
+
 	if(readBytes == 3 && System::isCSI(buffer))
-		action = (Entity::Action)ansiKeyBinding[buffer[2]];
+		action = (Controls::Action)ansiKeyBinding[buffer[2]];
 	else if(readBytes == 1)
-		action = (Entity::Action)asciiKeyBinding[buffer[0]];
+		action = (Controls::Action)asciiKeyBinding[buffer[0]];
+
 	if(readBytes)
 		hero->handleAction(action);
 }

@@ -5,6 +5,7 @@
 #define BACKGROUD_CORRIDOR '#'
 
 std::unique_ptr<Level> level;
+Entity* hero;
 
 Level::Level() :width(64), height(32), background((uint8_t*)malloc(width * height)) {
 	generate();

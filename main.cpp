@@ -1,8 +1,9 @@
-#include "Controls.h"
+#include "Level.h"
 
 int main(int argc, const char** argv) {
 	System::init();
 	level.reset(new Level());
+	hero = new Entity(level.get(), 17, 10);
 	Controls::init();
 
 	while(true) {

@@ -1,4 +1,4 @@
-#include "Map.h"
+#include "Level.h"
 
 System::TextAttribute System::textAttribute;
 System::Color System::foreground, System::background;

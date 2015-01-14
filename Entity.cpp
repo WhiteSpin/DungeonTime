@@ -1,11 +1,25 @@
-#include "Map.h"
+#include "Level.h"
+
+Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
+	:level(_level), posX(_posX), posY(_posY) {
+		level->entities.push_back(std::unique_ptr<Entity>(this));
+}
+
+bool Entity::die() {
+	for(uint64_t i = 0; i < level->entities.size(); ++i)
+		if(level->entities[i].get() == this) {
+			level->entities.erase(level->entities.begin()+i);
+			return true;
+		}
+	return false;
+}
 
 void Entity::doFrame() {
 	printf("@");
 }
 
 bool Entity::canEnter(uint64_t posX, uint64_t posY) {
-	return map.getBackgroundAt(posX, posY) == BACKGROUD_FLOOR;
+	return level->getBackgroundAt(posX, posY) == BACKGROUD_FLOOR;
 }
 
 bool Entity::handleAction(Action input) {
@@ -17,7 +31,7 @@ bool Entity::handleAction(Action input) {
 		}
 		return false;
 		case MoveDown:
-		if(posY < map.height-1 && canEnter(posX, posY+1)) {
+		if(posY < level->height-1 && canEnter(posX, posY+1)) {
 			posY ++;
 			return true;
 		}
@@ -29,7 +43,7 @@ bool Entity::handleAction(Action input) {
 		}
 		return false;
 		case MoveRight:
-		if(posX < map.width-1 && canEnter(posX+1, posY)) {
+		if(posX < level->width-1 && canEnter(posX+1, posY)) {
 			posX ++;
 			return true;
 		}

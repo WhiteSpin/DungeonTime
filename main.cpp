@@ -37,14 +37,7 @@ int main(int argc, const char** argv) {
 		System::doFrame();
 		map.doFrame();
 		System::eraseStartingAtLine(map.height);
-		for(auto i = messages.begin(); i != messages.end(); ) {
-			Message* msg = (*i).get();
-			msg->doFrame();
-			if(msg->lifeTime > 0.0)
-				++i;
-			else
-				messages.erase(i);
-		}
+		Message::doFrame();
 		System::setCursorPosition(hero.posX, hero.posY);
 
 		/*buffer[readBytes] = 0;

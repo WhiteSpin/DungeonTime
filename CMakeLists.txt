@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(NAME dungeon-time)
+set(NAME DungeonTime)
 
 project(${NAME})
 

@@ -3,6 +3,8 @@
 uint8_t moveKeyBinding[128];
 
 int main(int argc, const char** argv) {
+	Terminal::init();
+
 	memset(moveKeyBinding, 0, sizeof(moveKeyBinding));
 	moveKeyBinding['A'] = Up;
 	moveKeyBinding['B'] = Down;
@@ -20,8 +22,8 @@ int main(int argc, const char** argv) {
 
 	while(true) {
 		uint8_t buffer[16], moveDir;
-		uint64_t readBytes = term.handleKeyboard(sizeof(buffer), buffer);
-		if(readBytes == 3 && term.isCSI(buffer))
+		uint64_t readBytes = Terminal::handleKeyboard(sizeof(buffer), buffer);
+		if(readBytes == 3 && Terminal::isCSI(buffer))
 			moveDir = moveKeyBinding[buffer[2]];
 		else if(readBytes == 1)
 			moveDir = moveKeyBinding[buffer[0]];
@@ -29,7 +31,7 @@ int main(int argc, const char** argv) {
 			hero.moveControl(moveDir);
 
 		map.render();
-		term.setCursorPosition(hero.posX, hero.posY);
+		Terminal::setCursorPosition(hero.posX, hero.posY);
 		fflush(stdout);
 
 		usleep(50000);

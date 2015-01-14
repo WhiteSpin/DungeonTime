@@ -2,7 +2,14 @@
 
 static const char* CSI = "\33[";
 
-Terminal::Terminal() {
+void signalHandler(int signum) {
+	Terminal::cleanScreen();
+	exit(0);
+}
+
+void Terminal::init() {
+	//signal(SIGINT, signalHandler);
+
 	struct termios old;
 	if(tcgetattr(0, &old) < 0)
 		perror("tcsetattr()");
@@ -14,8 +21,13 @@ Terminal::Terminal() {
 		perror("tcsetattr ICANON");
 }
 
+void Terminal::cleanScreen() {
+	Terminal::setCursorPosition(0, 0);
+	printf("%s0J", CSI);
+}
+
 void Terminal::setCursorPosition(uint64_t posX, uint64_t posY) {
-	printf("%s%llu;%lluf", CSI, posY+1, posX+1);
+	printf("%s%llu;%lluf", CSI, posY+1ULL, posX+1ULL);
 }
 
 uint64_t Terminal::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {
@@ -35,5 +47,3 @@ uint64_t Terminal::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {
 bool Terminal::isCSI(uint8_t* buffer) {
 	return strncmp(CSI, (const char*)buffer, 2) == 0;
 }
-
-Terminal term;

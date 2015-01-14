@@ -13,7 +13,7 @@ Map::~Map() {
 }
 
 void Map::render() {
-	term.setCursorPosition(0, 0);
+	Terminal::setCursorPosition(0, 0);
 	for(uint64_t y = 0; y < height; y ++) {
 		for(uint64_t x = 0; x < width; x ++) {
 			fwrite(background.get()+y*width+x, 1, 1, stdout);

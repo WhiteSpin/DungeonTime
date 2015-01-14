@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
+#include <memory>
+#include <cstring>
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <termios.h>

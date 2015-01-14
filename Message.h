@@ -5,7 +5,7 @@ class Message {
     std::string text;
     float lifeTime;
     Message(const char* text);
-    void render();
+    void doFrame();
 };
 
 extern std::vector<std::unique_ptr<Message>> messages;

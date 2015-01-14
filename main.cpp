@@ -3,7 +3,7 @@
 uint8_t moveKeyBinding[128];
 
 int main(int argc, const char** argv) {
-	Terminal::init();
+	System::init();
 
 	memset(moveKeyBinding, 0, sizeof(moveKeyBinding));
 	moveKeyBinding['A'] = Up;
@@ -22,35 +22,35 @@ int main(int argc, const char** argv) {
 
 	while(true) {
 		uint8_t buffer[16], moveDir;
-		uint64_t readBytes = Terminal::handleKeyboard(sizeof(buffer), buffer);
-		if(readBytes == 3 && Terminal::isCSI(buffer))
+		uint64_t readBytes = System::handleKeyboard(sizeof(buffer), buffer);
+		if(readBytes == 3 && System::isCSI(buffer))
 			moveDir = moveKeyBinding[buffer[2]];
 		else if(readBytes == 1)
 			moveDir = moveKeyBinding[buffer[0]];
 		if(readBytes){
 			if(moveDir)
 				hero.moveControl(moveDir);
-			else {
+			else
 				hero.keyControl(buffer[0]);
-			}
 		}
 
-		Terminal::clearScreen();
-		map.render();
-		Terminal::setCursorPosition(hero.posX, hero.posY);
-		for(uint64_t i = 0; i < messages.size(); ++i) {
-			messages[i]->render();
-			if(messages[i]->lifeTime <= 0.0)
-				messages.erase(messages.begin() + i--);
-			// messages[i][0].render();
-			// (*messages[i]).render();
+		System::doFrame();
+		map.doFrame();
+		System::eraseStartingAtLine(map.height);
+		for(auto i = messages.begin(); i != messages.end(); ) {
+			Message* msg = (*i).get();
+			msg->doFrame();
+			if(msg->lifeTime > 0.0)
+				++i;
+			else
+				messages.erase(i);
 		}
-		Terminal::setCursorPosition(hero.posX, hero.posY);
-		fflush(stdout);
+		System::setCursorPosition(hero.posX, hero.posY);
 
-		usleep(50000);
-		//for(int i = 0; i < n; i ++)
-		//	printf("%d %x %d\n", i, buffer[i], buffer[i]);
+		/*buffer[readBytes] = 0;
+		printf("%s\n", buffer);
+		for(int i = 0; i < readBytes; i ++)
+			printf("%d %x %d\n", i, buffer[i], buffer[i]);*/
 	}
 
 	return 0;

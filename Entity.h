@@ -10,7 +10,7 @@ enum Direction {
 class Entity {
 	public:
 	uint64_t posX, posY;
-	void render();
+	void doFrame();
 	bool canEnter(uint64_t posX, uint64_t posY);
 	bool moveControl(uint8_t input);
 	bool keyControl(uint8_t input);

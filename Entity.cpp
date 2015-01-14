@@ -1,6 +1,6 @@
 #include "Map.h"
 
-void Entity::render() {
+void Entity::doFrame() {
 	printf("@");
 }
 

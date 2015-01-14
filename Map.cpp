@@ -12,13 +12,11 @@ Map::~Map() {
 
 }
 
-void Map::render() {
-	Terminal::setCursorPosition(0, 0);
-	for(uint64_t y = 0; y < height; y ++) {
-		for(uint64_t x = 0; x < width; x ++) {
+void Map::doFrame() {
+	for(uint64_t y = 0; y < height; ++y) {
+		for(uint64_t x = 0; x < width; ++x) {
 			fwrite(background.get()+y*width+x, 1, 1, stdout);
 		}
-		//fwrite(&background[y*width], 1, width, stdout);
 		printf("\n");
 	}
 }
@@ -38,18 +36,18 @@ bool Map::replaceBackgroundCell(uint8_t type, uint64_t posX, uint64_t posY) {
 }
 
 void Map::fillBackgroundRow(uint8_t type, uint64_t posX, uint64_t posY, uint64_t length) {
-	for(uint64_t x = posX; x < posX+length; x ++)
+	for(uint64_t x = posX; x < posX+length; ++x)
 		replaceBackgroundCell(type, x, posY);
 }
 
 void Map::fillBackgroundColumn(uint8_t type, uint64_t posX, uint64_t posY, uint64_t length) {
-	for(uint64_t y = posY; y < posY+length; y ++)
+	for(uint64_t y = posY; y < posY+length; ++y)
 		replaceBackgroundCell(type, posX, y);
 }
 
 void Map::fillBackgroundRect(uint8_t type, uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
-	for(uint64_t y = posY; y < posY+h; y ++)
-		for(uint64_t x = posX; x < posX+w; x ++)
+	for(uint64_t y = posY; y < posY+h; ++y)
+		for(uint64_t x = posX; x < posX+w; ++x)
 			replaceBackgroundCell(type, x, y);
 }
 

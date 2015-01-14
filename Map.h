@@ -11,7 +11,7 @@ class Map {
 	std::vector<std::unique_ptr<Entity>> entities;
 	Map();
 	~Map();
-	void render();
+	void doFrame();
 	uint8_t getBackgroundAt(uint64_t posX, uint64_t posY);
 	bool replaceBackgroundCell(uint8_t type, uint64_t posX, uint64_t posY);
 	void fillBackgroundRow(uint8_t type, uint64_t posX, uint64_t posY, uint64_t length);

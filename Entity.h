@@ -1,17 +1,16 @@
 #include "Message.h"
 
-enum Direction {
-	Up = 1,
-	Left = 2,
-	Down = 3,
-	Right = 4
-};
-
 class Entity {
 	public:
+	enum Action {
+		MoveUp = 1,
+		MoveLeft = 2,
+		MoveDown = 3,
+		MoveRight = 4
+	};
+
 	uint64_t posX, posY;
 	void doFrame();
 	bool canEnter(uint64_t posX, uint64_t posY);
-	bool moveControl(uint8_t input);
-	bool keyControl(uint8_t input);
+	bool handleAction(Action input);
 };

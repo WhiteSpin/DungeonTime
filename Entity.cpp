@@ -8,37 +8,33 @@ bool Entity::canEnter(uint64_t posX, uint64_t posY) {
 	return map.getBackgroundAt(posX, posY) == BACKGROUD_FLOOR;
 }
 
-bool Entity::moveControl(uint8_t input) {
+bool Entity::handleAction(Action input) {
 	switch(input) {
-		case Up:
+		case MoveUp:
 		if(posY > 0 && canEnter(posX, posY-1)) {
 			posY --;
 			return true;
 		}
 		return false;
-		case Down:
+		case MoveDown:
 		if(posY < map.height-1 && canEnter(posX, posY+1)) {
 			posY ++;
 			return true;
 		}
 		return false;
-		case Left:
+		case MoveLeft:
 		if(posX > 0 && canEnter(posX-1, posY)) {
 			posX --;
 			return true;
 		}
 		return false;
-		case Right:
+		case MoveRight:
 		if(posX < map.width-1 && canEnter(posX+1, posY)) {
 			posX ++;
 			return true;
 		}
 		return false;
 	}
-	return false;
-}
-
-bool Entity::keyControl(uint8_t input) {
 	messages.push_back(std::unique_ptr<Message>(new Message("Not An Arrow to the knee")));
 	return false;
 }

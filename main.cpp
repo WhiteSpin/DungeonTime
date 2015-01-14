@@ -1,19 +1,22 @@
 #include "Map.h"
 
-uint8_t moveKeyBinding[128];
+uint8_t asciiKeyBinding[128];
+uint8_t ansiKeyBinding[128];
 
 int main(int argc, const char** argv) {
 	System::init();
 
-	memset(moveKeyBinding, 0, sizeof(moveKeyBinding));
-	moveKeyBinding['A'] = Up;
-	moveKeyBinding['B'] = Down;
-	moveKeyBinding['C'] = Right;
-	moveKeyBinding['D'] = Left;
-	moveKeyBinding['k'] = Up;
-	moveKeyBinding['j'] = Down;
-	moveKeyBinding['l'] = Right;
-	moveKeyBinding['h'] = Left;
+	memset(asciiKeyBinding, 0, sizeof(asciiKeyBinding));
+	asciiKeyBinding['k'] = Entity::MoveUp;
+	asciiKeyBinding['j'] = Entity::MoveDown;
+	asciiKeyBinding['l'] = Entity::MoveRight;
+	asciiKeyBinding['h'] = Entity::MoveLeft;
+
+	memset(ansiKeyBinding, 0, sizeof(ansiKeyBinding));
+	ansiKeyBinding['A'] = Entity::MoveUp;
+	ansiKeyBinding['B'] = Entity::MoveDown;
+	ansiKeyBinding['C'] = Entity::MoveRight;
+	ansiKeyBinding['D'] = Entity::MoveLeft;
 
 	map.generate();
 	Entity hero;
@@ -21,18 +24,15 @@ int main(int argc, const char** argv) {
 	hero.posY = 10;
 
 	while(true) {
-		uint8_t buffer[16], moveDir;
+		Entity::Action action;
+		uint8_t buffer[16];
 		uint64_t readBytes = System::handleKeyboard(sizeof(buffer), buffer);
 		if(readBytes == 3 && System::isCSI(buffer))
-			moveDir = moveKeyBinding[buffer[2]];
+			action = (Entity::Action)ansiKeyBinding[buffer[2]];
 		else if(readBytes == 1)
-			moveDir = moveKeyBinding[buffer[0]];
-		if(readBytes){
-			if(moveDir)
-				hero.moveControl(moveDir);
-			else
-				hero.keyControl(buffer[0]);
-		}
+			action = (Entity::Action)asciiKeyBinding[buffer[0]];
+		if(readBytes)
+			hero.handleAction(action);
 
 		System::doFrame();
 		map.doFrame();

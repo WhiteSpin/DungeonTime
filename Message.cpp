@@ -9,12 +9,12 @@ Message::Message(const std::string& _text)
 void Message::doFrame() {
     for(int64_t i = list.size()-1; i >= 0; ) {
         Message* msg = list[i].get();
+        if (list.size() - i < 11)
+            printf("%s\n", msg->text.c_str());
+            msg->lifeTime -= System::frameDuration;
 
-        printf("%s\n", msg->text.c_str());
-        msg->lifeTime -= System::frameDuration;
-
-        if(msg->lifeTime > 0.0)
-            --i;
+            if(msg->lifeTime > 0.0)
+                --i;
         else{
             list.erase(list.begin() + i);
             if(i == 0)

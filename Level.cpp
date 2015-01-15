@@ -12,8 +12,10 @@ Level::~Level() {
 }
 
 void Level::doFrame() {
-	for(uint64_t y = 0; y < height; ++y) {
-		for(uint64_t x = 0; x < width; ++x) {
+	uint64_t maxX = std::min(width, (uint64_t)System::screenSize.ws_col),
+			 maxY = std::min(height, (uint64_t)System::screenSize.ws_row-1);
+	for(uint64_t y = 0; y < maxY; ++y) {
+		for(uint64_t x = 0; x < maxX; ++x) {
 			auto entity = getEntityAt(x, y);
 			if(entity)
 				entity->doFrame();

@@ -3,8 +3,8 @@
 System::TextAttribute System::textAttribute;
 System::Color System::foreground, System::background;
 double System::frameDuration, lastTime;
-struct termios original;
-struct winsize screenSize;
+struct termios System::original;
+struct winsize System::screenSize;
 static const char* CSI = "\33[";
 
 void System::init() {

@@ -47,4 +47,6 @@ namespace System {
     void doFrame();
 
     extern double frameDuration;
+    extern struct termios original;
+    extern struct winsize screenSize;
 };

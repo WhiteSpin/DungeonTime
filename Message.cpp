@@ -1,4 +1,4 @@
-#include "Message.h"
+#include "Level.h"
 
 std::vector<std::unique_ptr<Message>> Message::list;
 
@@ -7,14 +7,21 @@ Message::Message(const std::string& _text)
 }
 
 void Message::doFrame() {
+    if(System::screenSize.ws_row <= level->height)
+        return;
+
+    printf("\n");
+
+    int64_t maxLine = System::screenSize.ws_row - level->height - 1;
     for(int64_t i = list.size()-1; i >= 0; ) {
         Message* msg = list[i].get();
-        if (list.size() - i < 11)
-            printf("%s\n", msg->text.c_str());
-            msg->lifeTime -= System::frameDuration;
 
-            if(msg->lifeTime > 0.0)
-                --i;
+        if(list.size() - i < maxLine)
+            printf("> %s\n", msg->text.c_str());
+
+        msg->lifeTime -= System::frameDuration;
+        if(msg->lifeTime > 0.0)
+            --i;
         else{
             list.erase(list.begin() + i);
             if(i == 0)

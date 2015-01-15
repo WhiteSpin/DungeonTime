@@ -41,6 +41,7 @@ namespace System {
     void eraseStartingAtLine(uint64_t atLine);
     void setCursorPosition(uint64_t posX, uint64_t posY);
     void setTextStyle();
+    void renderRightAlignedText(uint64_t row, const char* text);
     uint64_t handleKeyboard(uint64_t bufferSize, uint8_t* buffer);
     bool isCSI(uint8_t* buffer);
     double getTime();

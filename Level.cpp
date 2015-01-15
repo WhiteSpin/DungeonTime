@@ -13,8 +13,9 @@ Level::~Level() {
 
 void Level::doFrame() {
 	uint64_t maxX = std::min(width, (uint64_t)System::screenSize.ws_col),
-			 maxY = std::min(height, (uint64_t)System::screenSize.ws_row-1);
+			 maxY = std::min(height, (uint64_t)System::screenSize.ws_row);
 	for(uint64_t y = 0; y < maxY; ++y) {
+		System::setCursorPosition(0, y);
 		for(uint64_t x = 0; x < maxX; ++x) {
 			auto entity = getEntityAt(x, y);
 			if(entity)
@@ -22,7 +23,6 @@ void Level::doFrame() {
 			else
 				fwrite(background.get()+y*width+x, 1, 1, stdout);
 		}
-		printf("\n");
 	}
 }
 

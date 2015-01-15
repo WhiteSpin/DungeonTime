@@ -8,18 +8,18 @@ struct winsize System::screenSize;
 static const char* CSI = "\33[";
 
 void System::init() {
-	tcgetattr(0, &original);
+	tcgetattr(STDIN_FILENO, &original);
 	signal(SIGINT, (void(*)(int))System::terminate);
-	ioctl(0, TIOCGWINSZ, &screenSize);
+	ioctl(STDIN_FILENO, TIOCGWINSZ, &screenSize);
 	System::eraseStartingAtLine(0);
 
 	struct termios aux;
-	tcgetattr(0, &aux);
+	tcgetattr(STDIN_FILENO, &aux);
 	aux.c_lflag &= ~ICANON;
 	aux.c_lflag &= ~ECHO;
 	aux.c_cc[VMIN] = 1;
 	aux.c_cc[VTIME] = 0;
-	tcsetattr(0, TCSANOW, &aux);
+	tcsetattr(STDIN_FILENO, TCSANOW, &aux);
 
 	lastTime = getTime();
 }
@@ -35,11 +35,10 @@ void System::terminate() {
 }
 
 void System::eraseStartingAtLine(uint64_t atLine) {
-	setCursorPosition(0, atLine);
-	for(uint64_t y = atLine; y < screenSize.ws_row-1; ++y) {
+	for(uint64_t y = atLine; y < screenSize.ws_row; ++y) {
+		setCursorPosition(0, y);
 		for(uint64_t x = 0; x < screenSize.ws_col; ++x)
 			printf(" ");
-		printf("\n");
 	}
 	setCursorPosition(0, atLine);
 }
@@ -50,6 +49,20 @@ void System::setCursorPosition(uint64_t posX, uint64_t posY) {
 
 void System::setTextStyle() {
 	printf("%s%u;%llu;%llum", CSI, textAttribute, foreground+30ULL, background+40ULL);
+}
+
+void System::renderRightAlignedText(uint64_t row, const char* text) {
+	if(row >= screenSize.ws_row)
+		return;
+
+	int64_t len = strlen(text), col = screenSize.ws_col-len;
+	if(col <= level->width)
+		col = level->width+1;
+	len = screenSize.ws_col-col;
+
+	setCursorPosition(col, row);
+	if(len > 0)
+		fwrite(text, 1, len, stdout);
 }
 
 uint64_t System::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {
@@ -87,8 +100,7 @@ void System::doFrame() {
 	   newScreenSize.ws_row != screenSize.ws_row) {
 		eraseStartingAtLine(0);
 		memcpy(&screenSize, &newScreenSize, sizeof(struct winsize));
-	}else
-		setCursorPosition(0, 0);
+	}
 
 	textAttribute = ResetAll;
 	foreground = White;

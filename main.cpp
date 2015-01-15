@@ -3,7 +3,7 @@
 int main(int argc, const char** argv) {
 	System::init();
 	level.reset(new Level());
-	hero = new Entity(level.get(), 17, 10);
+	hero = new Entity(level.get(), 10, 5);
 	Controls::init();
 
 	while(true) {
@@ -13,11 +13,6 @@ int main(int argc, const char** argv) {
 		System::eraseStartingAtLine(level->height);
 		Message::doFrame();
 		System::setCursorPosition(hero->posX, hero->posY);
-
-		/*buffer[readBytes] = 0;
-		printf("%s\n", buffer);
-		for(int i = 0; i < readBytes; i ++)
-			printf("%d %x %d\n", i, buffer[i], buffer[i]);*/
 	}
 
 	return 0;

@@ -21,9 +21,6 @@ void System::init() {
 	aux.c_cc[VTIME] = 0;
 	tcsetattr(0, TCSANOW, &aux);
 
-	textAttribute = ResetAll;
-	foreground = White;
-	background = Black;
 	lastTime = getTime();
 }
 
@@ -83,8 +80,19 @@ double System::getTime() {
 void System::doFrame() {
 	fflush(stdout);
 	usleep(50000);
-	ioctl(0, TIOCGWINSZ, &screenSize);
-	setCursorPosition(0, 0);
+
+	struct winsize newScreenSize;
+	ioctl(0, TIOCGWINSZ, &newScreenSize);
+	if(newScreenSize.ws_col != screenSize.ws_col ||
+	   newScreenSize.ws_row != screenSize.ws_row) {
+		eraseStartingAtLine(0);
+		memcpy(&screenSize, &newScreenSize, sizeof(struct winsize));
+	}else
+		setCursorPosition(0, 0);
+
+	textAttribute = ResetAll;
+	foreground = White;
+	background = Black;
 	setTextStyle();
 
 	double now = getTime();

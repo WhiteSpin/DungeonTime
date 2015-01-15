@@ -1,13 +1,9 @@
 #include "Level.h"
 
-#define BACKGROUD_EMPTY ' '
-#define BACKGROUD_FLOOR '.'
-#define BACKGROUD_CORRIDOR '#'
-
 std::unique_ptr<Level> level;
 Entity* hero;
 
-Level::Level() :width(64), height(32), background((uint8_t*)malloc(width * height)) {
+Level::Level() :width(75), height(25), background((uint8_t*)malloc(width * height)) {
 	generate();
 }
 
@@ -39,72 +35,99 @@ uint8_t Level::getBackgroundAt(uint64_t posX, uint64_t posY) {
 	return *(background.get()+posY*width+posX);
 }
 
-bool Level::replaceBackgroundCell(uint8_t type, uint64_t posX, uint64_t posY) {
-	uint8_t* ptr = background.get()+posY*width+posX;
-	switch(*ptr) {
-		case BACKGROUD_FLOOR:
-		return false;
-	}
-	*ptr = type;
-	return true;
+void Level::setBackgroundAt(uint64_t posX, uint64_t posY, uint8_t type) {
+	*(background.get()+posY*width+posX) = type;
 }
 
-void Level::fillBackgroundRow(uint8_t type, uint64_t posX, uint64_t posY, uint64_t length) {
+void Level::fillBackgroundRow(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type) {
 	for(uint64_t x = posX; x < posX+length; ++x)
-		replaceBackgroundCell(type, x, posY);
+		setBackgroundAt(x, posY, type);
 }
 
-void Level::fillBackgroundColumn(uint8_t type, uint64_t posX, uint64_t posY, uint64_t length) {
+void Level::fillBackgroundColumn(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type) {
 	for(uint64_t y = posY; y < posY+length; ++y)
-		replaceBackgroundCell(type, posX, y);
+		setBackgroundAt(posX, y, type);
 }
 
-void Level::fillBackgroundRect(uint8_t type, uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
+void Level::fillBackgroundRect(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, uint8_t type) {
 	for(uint64_t y = posY; y < posY+h; ++y)
 		for(uint64_t x = posX; x < posX+w; ++x)
-			replaceBackgroundCell(type, x, y);
+			setBackgroundAt(x, y, type);
 }
 
-void Level::generateRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
-	fillBackgroundRow('-', posX+1, posY, w-2);
-	fillBackgroundRow('-', posX+1, posY+h-1, w-2);
-	fillBackgroundColumn('|', posX, posY+1, h-2);
-	fillBackgroundColumn('|', posX+w-1, posY+1, h-2);
-	fillBackgroundRect('.', posX+1, posY+1, w-2, h-2);
+void Level::generateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY, uint8_t type) {
+	//Bresenham Line
+
+
+}
+
+void Level::generateEllipseRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
+	//Bresenham Ellipse
+
+	int64_t dx = 0, dy = h, w2 = w*w, h2 = h*h, err = h2-(2*h-1)*w2, e2;
+
+	do {
+		setBackgroundAt(posX-dx, posY-dy, BACKGROUD_CORRIDOR);
+		fillBackgroundColumn(posX-dx, posY-dy+1, dy*2-1, BACKGROUD_FLOOR);
+		setBackgroundAt(posX-dx, posY+dy, BACKGROUD_CORRIDOR);
+
+		setBackgroundAt(posX+dx, posY-dy, BACKGROUD_CORRIDOR);
+		fillBackgroundColumn(posX+dx, posY-dy+1, dy*2-1, BACKGROUD_FLOOR);
+		setBackgroundAt(posX+dx, posY+dy, BACKGROUD_CORRIDOR);
+
+		e2 = 2*err;
+		if(e2 <  (2*dx+1)*h2) err += (2*(++dx)+1)*h2;
+		if(e2 > -(2*dy-1)*w2) err -= (2*(--dy)-1)*w2;
+	} while(dy >= 0);
+
+	while(dx++ < w) {
+		setBackgroundAt(posX-dx, posY, BACKGROUD_CORRIDOR);
+		setBackgroundAt(posX+dx, posY, BACKGROUD_CORRIDOR);
+	}
+}
+
+void Level::generateRectRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
+	fillBackgroundRow(posX+1, posY, w-2, BACKGROUD_WALLX);
+	fillBackgroundRow(posX+1, posY+h-1, w-2, BACKGROUD_WALLX);
+	fillBackgroundColumn(posX, posY+1, h-2, BACKGROUD_WALLY);
+	fillBackgroundColumn(posX+w-1, posY+1, h-2, BACKGROUD_WALLY);
+	fillBackgroundRect(posX+1, posY+1, w-2, h-2, BACKGROUD_FLOOR);
 }
 
 void Level::generateXSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
 	uint64_t half = w >> 1;
-	generateRoom(posX, posY, half+1, h);
-	generateRoom(posX+half, posY, w-half, h);
-	replaceBackgroundCell(BACKGROUD_CORRIDOR, posX+half, posY+h/2);
+	generateRectRoom(posX, posY, half+1, h);
+	generateRectRoom(posX+half, posY, w-half, h);
+	setBackgroundAt(posX+half, posY+h/2, BACKGROUD_CLOSED_DOOR);
 }
 
 void Level::generateYSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
 	uint64_t half = h >> 1;
-	generateRoom(posX, posY, w, half+1);
-	generateRoom(posX, posY+half, w, h-half);
-	replaceBackgroundCell(BACKGROUD_CORRIDOR, posX+w/2, posY+half);
+	generateRectRoom(posX, posY, w, half+1);
+	generateRectRoom(posX, posY+half, w, h-half);
+	setBackgroundAt(posX+w/2, posY+half, BACKGROUD_CLOSED_DOOR);
 }
 
 void Level::generateXCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
-	fillBackgroundRow(BACKGROUD_CORRIDOR, posX, posY, w);
-	fillBackgroundRow(BACKGROUD_CORRIDOR, posX, posY+h-1, w);
-	fillBackgroundRect(BACKGROUD_FLOOR, posX, posY+1, w, h-2);
+	fillBackgroundRow(posX, posY, w, BACKGROUD_CORRIDOR);
+	fillBackgroundRow(posX, posY+h-1, w, BACKGROUD_CORRIDOR);
+	fillBackgroundRect(posX, posY+1, w, h-2, BACKGROUD_FLOOR);
 }
 
 void Level::generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
-	fillBackgroundColumn(BACKGROUD_CORRIDOR, posX, posY, h);
-	fillBackgroundColumn(BACKGROUD_CORRIDOR, posX+w-1, posY, h);
-	fillBackgroundRect(BACKGROUD_FLOOR, posX+1, posY, w-2, h);
+	fillBackgroundColumn(posX, posY, h, BACKGROUD_CORRIDOR);
+	fillBackgroundColumn(posX+w-1, posY, h, BACKGROUD_CORRIDOR);
+	fillBackgroundRect(posX+1, posY, w-2, h, BACKGROUD_FLOOR);
 }
 
 void Level::generate() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
-	generateXSplitRoom(8, 4, 15, 9);
-	generateYSplitRoom(32, 4, 15, 9);
-	generateXCorridor(22, 5, 11, 3);
-	generateYCorridor(26, 3, 3, 11);
+	generateXSplitRoom(1, 1, 15, 9);
+	generateYSplitRoom(25, 1, 15, 9);
+	generateEllipseRoom(20, 13, 7, 4);
+	generateXCorridor(15, 2, 11, 3);
+	generateYCorridor(19, 4, 3, 6);
+	generateLine(35, 1, 54, 15, BACKGROUD_CORRIDOR);
 	//generateRoom(8, 2, 9, 4);
 	//generateRoom(8, 2, 9, 4);
 }

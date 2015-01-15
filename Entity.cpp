@@ -2,7 +2,7 @@
 
 Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
 	:level(_level), posX(_posX), posY(_posY) {
-		level->entities.push_back(std::unique_ptr<Entity>(this));
+	level->entities.push_back(std::unique_ptr<Entity>(this));
 }
 
 bool Entity::die() {
@@ -38,7 +38,12 @@ void Entity::doFrame() {
 }
 
 bool Entity::canEnter(uint64_t posX, uint64_t posY) {
-	return level->getBackgroundAt(posX, posY) == BACKGROUD_FLOOR;
+	switch(level->getBackgroundAt(posX, posY)) {
+		case BACKGROUD_FLOOR:
+		case BACKGROUD_OPEN_DOOR:
+		return true;
+	}
+	return false;
 }
 
 bool Entity::handleAction(Controls::Action input) {

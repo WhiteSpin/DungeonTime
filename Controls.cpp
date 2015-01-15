@@ -40,4 +40,9 @@ void Controls::doFrame() {
 
 	if(readBytes)
 		hero->handleAction(action);
+
+	/*buffer[readBytes] = 0;
+	printf("%s\n", buffer);
+	for(int i = 0; i < readBytes; i ++)
+		printf("%d %x %d\n", i, buffer[i], buffer[i]);*/
 }

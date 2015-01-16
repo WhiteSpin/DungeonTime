@@ -26,14 +26,14 @@ void Level::doFrame() {
 	}
 }
 
-Entity* Level::getEntityAt(uint64_t posX, uint64_t posY) {
+Entity* Level::getEntityAt(uint64_t posX, uint64_t posY) const {
 	for(uint64_t i = 0; i < entities.size(); ++i)
 		if(entities[i]->posX == posX && entities[i]->posY == posY)
 			return entities[i].get();
 	return NULL;
 }
 
-uint8_t Level::getBackgroundAt(uint64_t posX, uint64_t posY) {
+uint8_t Level::getBackgroundAt(uint64_t posX, uint64_t posY) const {
 	return *(background.get()+posY*width+posX);
 }
 

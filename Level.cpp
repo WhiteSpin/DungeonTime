@@ -59,7 +59,17 @@ void Level::fillBackgroundRect(uint64_t posX, uint64_t posY, uint64_t w, uint64_
 
 void Level::generateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY, uint8_t type) {
 	//Bresenham Line
+	int dx =  abs(toX-fromX), sx = fromX<toX ? 1 : -1;
+	int dy = -abs(toY-fromY), sy = fromY<toY ? 1 : -1;
+	int err = dx+dy, e2;
 
+	while(1) {
+		setBackgroundAt(fromX, fromY, type);
+		if (fromX==toX && fromY==toY) break;
+		e2 = 2*err;
+		if (e2 > dy) { err += dy; fromX += sx; }
+		if (e2 < dx) { err += dx; fromY += sy; }
+	}
 
 }
 
@@ -129,7 +139,7 @@ void Level::generate() {
 	generateEllipseRoom(20, 13, 7, 4);
 	generateXCorridor(15, 2, 11, 3);
 	generateYCorridor(19, 4, 3, 6);
-	generateLine(35, 1, 54, 15, BACKGROUD_CORRIDOR);
+	generateLine(35, 1, 85, 15, BACKGROUD_CORRIDOR);
 	//generateRoom(8, 2, 9, 4);
 	//generateRoom(8, 2, 9, 4);
 }

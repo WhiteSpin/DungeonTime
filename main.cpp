@@ -10,7 +10,6 @@ int main(int argc, const char** argv) {
 		System::doFrame();
 		Controls::doFrame();
 		level->doFrame();
-		System::eraseStartingAtLine(level->height);
 		Message::doFrame();
 		System::setCursorPosition(hero->posX, hero->posY);
 	}

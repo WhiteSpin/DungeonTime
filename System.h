@@ -38,7 +38,7 @@ namespace System {
 
     void init();
     void terminate();
-    void eraseStartingAtLine(uint64_t atLine);
+    void eraseScreen();
     void setCursorPosition(uint64_t posX, uint64_t posY);
     void setTextStyle();
     void renderRightAlignedText(uint64_t row, const char* text);

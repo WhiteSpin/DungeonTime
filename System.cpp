@@ -11,7 +11,7 @@ void System::init() {
 	tcgetattr(STDIN_FILENO, &original);
 	signal(SIGINT, (void(*)(int))System::terminate);
 	ioctl(STDIN_FILENO, TIOCGWINSZ, &screenSize);
-	System::eraseStartingAtLine(0);
+	eraseScreen();
 
 	struct termios aux;
 	tcgetattr(STDIN_FILENO, &aux);
@@ -25,7 +25,7 @@ void System::init() {
 }
 
 void System::terminate() {
-	eraseStartingAtLine(0);
+	eraseScreen();
 	textAttribute = ResetAll;
 	foreground = Default;
 	background = Default;
@@ -34,13 +34,13 @@ void System::terminate() {
 	exit(0);
 }
 
-void System::eraseStartingAtLine(uint64_t atLine) {
-	for(uint64_t y = atLine; y < screenSize.ws_row; ++y) {
+void System::eraseScreen() {
+	for(uint64_t y = 0; y < screenSize.ws_row; ++y) {
 		setCursorPosition(0, y);
 		for(uint64_t x = 0; x < screenSize.ws_col; ++x)
 			printf(" ");
 	}
-	setCursorPosition(0, atLine);
+	setCursorPosition(0, 0);
 }
 
 void System::setCursorPosition(uint64_t posX, uint64_t posY) {
@@ -98,7 +98,7 @@ void System::doFrame() {
 	ioctl(0, TIOCGWINSZ, &newScreenSize);
 	if(newScreenSize.ws_col != screenSize.ws_col ||
 	   newScreenSize.ws_row != screenSize.ws_row) {
-		eraseStartingAtLine(0);
+		eraseScreen();
 		memcpy(&screenSize, &newScreenSize, sizeof(struct winsize));
 	}
 
@@ -106,6 +106,7 @@ void System::doFrame() {
 	foreground = White;
 	background = Black;
 	setTextStyle();
+	eraseScreen();
 
 	double now = getTime();
 	frameDuration = now-lastTime;

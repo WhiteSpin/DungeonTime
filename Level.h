@@ -1,4 +1,4 @@
-#include "human.h"
+#include "Human.h"
 
 #define BACKGROUD_EMPTY ' '
 #define BACKGROUD_FLOOR '.'

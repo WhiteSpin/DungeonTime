@@ -2,11 +2,13 @@
 #include <sys/time.h>
 #include <termios.h>
 #include <signal.h>
-//#include <stdlib.h>
 #include <unistd.h>
 #include <algorithm>
 #include <iostream>
 #include <memory>
 #include <vector>
 #include <string>
-//#include <cstring>
+#include <cstring>
+
+class Item;
+class Level;

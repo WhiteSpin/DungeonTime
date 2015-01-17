@@ -45,11 +45,14 @@ bool Controls::tryToSelectItemSlot(Action action) {
 	return true;
 }
 
-void Controls::printItemSlot(char* buffer, uint64_t index) {
-	if(hero->inventory[index].get())
-		sprintf(buffer, "%llu (%s) : %s", index+1ULL, hero->getInventorySlotName(index), hero->inventory[index]->getDescription().c_str());
+Item* Controls::printItemSlot(char* buffer, uint64_t index) {
+	const char* slotName = hero->getInventorySlotName(index);
+	Item* item = hero->inventory[index].get();
+	if(item)
+		sprintf(buffer, "%llu (%s) : %s", index+1ULL, slotName, item->getDescription().c_str());
 	else
-		sprintf(buffer, "%llu (%s) : -", index+1ULL, hero->getInventorySlotName(index));
+		sprintf(buffer, "%llu (%s) : -", index+1ULL, slotName);
+	return item;
 }
 
 void Controls::handleInput(uint8_t* input, Action action) {
@@ -138,14 +141,19 @@ void Controls::doFrame() {
 		} break;
 		case Mode::ItemSelection: {
 			System::renderRightAlignedText(0, "Selected Items:");
+			float massSum = 0.0;
 			for(uint64_t i = 0; i < itemSelection.size(); i ++) {
-				printItemSlot(buffer, itemSelection[i]);
+				Item* item = printItemSlot(buffer, itemSelection[i]);
 				System::renderRightAlignedText(i+1, buffer);
+				if(item)
+					massSum += item->getMass();
 			}
 			uint64_t line = itemSelection.size()+2;
-			System::renderRightAlignedText(line, "Drop");
-			System::renderRightAlignedText(line+1, "Apply");
-			System::renderRightAlignedText(line+2, "Swap");
+			sprintf(buffer, "%.f Kg", massSum);
+			System::renderRightAlignedText(line, buffer);
+			System::renderRightAlignedText(line+1, "Drop");
+			System::renderRightAlignedText(line+2, "Apply");
+			System::renderRightAlignedText(line+3, "Swap");
 		} break;
 	}
 }

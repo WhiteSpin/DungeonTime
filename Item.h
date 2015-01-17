@@ -1,9 +1,7 @@
 #include "Controls.h"
 
-class Level;
-
 class Item {
 	public:
-	std::string name;
+	float getMass() const;
 	std::string getDescription() const;
 };

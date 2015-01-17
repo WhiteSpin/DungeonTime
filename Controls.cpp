@@ -47,9 +47,9 @@ bool Controls::tryToSelectItemSlot(Action action) {
 
 void Controls::printItemSlot(char* buffer, uint64_t index) {
 	if(hero->inventory[index].get())
-		sprintf(buffer, "%llu (%s) : %s", index+1, hero->getInventorySlotName(index), hero->inventory[index]->getDescription().c_str());
+		sprintf(buffer, "%llu (%s) : %s", index+1ULL, hero->getInventorySlotName(index), hero->inventory[index]->getDescription().c_str());
 	else
-		sprintf(buffer, "%llu (%s) : -", index+1, hero->getInventorySlotName(index));
+		sprintf(buffer, "%llu (%s) : -", index+1ULL, hero->getInventorySlotName(index));
 }
 
 void Controls::handleInput(uint8_t* input, Action action) {

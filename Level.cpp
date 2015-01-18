@@ -63,14 +63,15 @@ void Level::generateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t 
 	int dy = -abs(toY-fromY), sy = fromY<toY ? 1 : -1;
 	int err = dx+dy, e2;
 
-	while(1) {
+	while(true) {
 		setBackgroundAt(fromX, fromY, type);
-		if (fromX==toX && fromY==toY) break;
-		e2 = 2*err;
-		if (e2 > dy) { err += dy; fromX += sx; }
-		if (e2 < dx) { err += dx; fromY += sy; }
-	}
+		if(fromX == toX && fromY == toY)
+			break;
 
+		e2 = 2*err;
+		if(e2 > dy) { err += dy; fromX += sx; }
+		if(e2 < dx) { err += dx; fromY += sy; }
+	}
 }
 
 void Level::generateEllipseRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {

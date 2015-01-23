@@ -140,7 +140,7 @@ void Level::generate() {
 	generateEllipseRoom(20, 13, 7, 4);
 	generateXCorridor(15, 2, 11, 3);
 	generateYCorridor(19, 4, 3, 6);
-	generateLine(35, 1, 85, 15, BACKGROUD_CORRIDOR);
+	//generateLine(45, 1, 55, 15, BACKGROUD_CORRIDOR);
 	//generateRoom(8, 2, 9, 4);
 	//generateRoom(8, 2, 9, 4);
 }

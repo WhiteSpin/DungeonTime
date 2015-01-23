@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <memory>
 #include <vector>
 #include <string>

@@ -5,10 +5,6 @@ Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
 	level->entities.push_back(std::unique_ptr<Entity>(this));
 }
 
-const char* Entity::getInventorySlotName(uint64_t index) const {
-	return NULL;
-}
-
 bool Entity::die() {
 	health = 0.0;
 	for(uint64_t i = 0; i < level->entities.size(); ++i)

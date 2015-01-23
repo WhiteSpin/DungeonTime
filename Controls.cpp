@@ -29,7 +29,7 @@ void Controls::init() {
 
 bool Controls::tryToSelectItemSlot(Action action) {
 	if(action < Action::SelectSlot ||
-	   action >= Action::SelectSlot+hero->inventory.size())
+	   action >= Action::SelectSlot+hero->inventory->items.size())
 		return false;
 
 	uint64_t index = action-Action::SelectSlot;
@@ -43,16 +43,6 @@ bool Controls::tryToSelectItemSlot(Action action) {
 		mode = Mode::ItemSelection;
 	}
 	return true;
-}
-
-Item* Controls::printItemSlot(char* buffer, uint64_t index) {
-	const char* slotName = hero->getInventorySlotName(index);
-	Item* item = hero->inventory[index].get();
-	if(item)
-		sprintf(buffer, "%llu (%s) : %s", index+1ULL, slotName, item->getDescription().c_str());
-	else
-		sprintf(buffer, "%llu (%s) : -", index+1ULL, slotName);
-	return item;
 }
 
 void Controls::handleInput(uint8_t* input, Action action) {
@@ -143,8 +133,10 @@ void Controls::doFrame() {
 			System::renderRightAlignedText(0, "Selected Items:");
 			float massSum = 0.0;
 			for(uint64_t i = 0; i < itemSelection.size(); i ++) {
-				Item* item = printItemSlot(buffer, itemSelection[i]);
+				uint64_t slot = itemSelection[i];
+				strcpy(buffer, hero->inventory->getSlotDescription(slot).c_str());
 				System::renderRightAlignedText(i+1, buffer);
+				Item* item = hero->inventory->getItemInSlot(slot);
 				if(item)
 					massSum += item->getMass();
 			}

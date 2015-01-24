@@ -15,16 +15,18 @@ Inventory::Inventory(uint64_t slots) {
 		items.push_back(std::unique_ptr<Item>());
 }
 
+std::string Inventory::getDescription() const {
+	return "Generic Inventory";
+}
+
+uint64_t Inventory::getSlotCount() const {
+	return items.size();
+}
+
+std::string Inventory::getSlotName(uint64_t slot) const {
+	return std::to_string(slot+1);
+}
+
 Item* Inventory::getItemInSlot(uint64_t slot) const {
 	return items[slot].get();
-}
-
-const std::string Inventory::getSlotDescription(uint64_t slot) const {
-	std::stringstream ss;
-	ss << getSlotName(slot) << " : " << getItemInSlot(slot)->getDescription();
-	return ss.str();
-}
-
-const std::string Inventory::getSlotName(uint64_t slot) const {
-	return std::to_string(slot+1);
 }

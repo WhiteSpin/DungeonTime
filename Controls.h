@@ -12,17 +12,17 @@ namespace Controls {
 		Confirm,
 		Primary,
 		Secondary,
-		SelectSlot
+		Select0,
+		Select9 = Select0+9
 	};
 
 	enum Mode {
 		Move,
 		Command,
-		ItemSelection
+		Selection
 	};
 
 	void init();
-	bool tryToSelectItemSlot(Action action);
 	Item* printItemSlot(char* buffer, uint64_t index);
 	void handleInput(uint8_t* input, Action action);
 	void doFrame();

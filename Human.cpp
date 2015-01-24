@@ -4,7 +4,11 @@ HumanInventory::HumanInventory() :Inventory(9) {
 
 }
 
-const std::string HumanInventory::getInventorySlotName(uint64_t slot) const {
+std::string HumanInventory::getDescription() const {
+	return "Human Inventory";
+}
+
+std::string HumanInventory::getSlotName(uint64_t slot) const {
 	const char* inventorySlotNames[] = {
 		"1 Right Hand",
 		"2 Left Hand",
@@ -16,7 +20,6 @@ const std::string HumanInventory::getInventorySlotName(uint64_t slot) const {
 		"8 Legs",
 		"9 Feet"
 	};
-
 	return inventorySlotNames[slot];
 }
 

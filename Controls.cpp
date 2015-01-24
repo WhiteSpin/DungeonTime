@@ -3,8 +3,101 @@
 Controls::Mode mode = Controls::Move;
 uint8_t asciiKeyBinding[128];
 uint8_t ansiKeyBinding[128];
-std::vector<uint64_t> itemSelection;
 std::string commandLine;
+
+
+class Selection;
+std::unique_ptr<Selection> selection;
+uint64_t selectionIndex = 0;
+
+class Selection {
+	public:
+	Item* item;
+	Selection* activeSelection;
+	std::vector<std::unique_ptr<Selection>> contains;
+
+	Selection(Item* _item) :item(_item), activeSelection(NULL) {
+
+	}
+
+	static void printInner(std::stringstream& ss, Item* item, uint64_t depth) {
+		ss << item->getDescription() << " |";
+		for(uint64_t i = 0; i < depth; i ++)
+			ss << "=";
+
+		Inventory* inventory = dynamic_cast<Inventory*>(item);
+		if(!inventory)
+			return;
+		depth ++;
+		for(uint64_t i = 0; i < inventory->getSlotCount(); i ++)
+			printInner(ss, inventory->getItemInSlot(i), depth);
+	}
+
+	static void removeActive() {
+		selectionIndex = 0;
+		Selection* active = selection.get();
+		while(active && active->activeSelection) {
+			if(!active->activeSelection->activeSelection) {
+				delete active->activeSelection;
+				active->activeSelection = NULL;
+				return;
+			}
+			active = active->activeSelection;
+		}
+	}
+
+	static void addActive() {
+		Selection* active = selection.get();
+		while(active) {
+			if(!active->activeSelection) {
+				Inventory* inventory = dynamic_cast<Inventory*>(active->item);
+				if(!inventory || inventory->getSlotCount() <= selectionIndex)
+					return;
+				active->activeSelection = new class Selection(inventory->getItemInSlot(selectionIndex));
+			}
+			active = active->activeSelection;
+		}
+		selectionIndex = 0;
+	}
+
+	static bool handleInput(Controls::Action action) {
+		switch(action) {
+			case Controls::Delete:
+				selectionIndex = selectionIndex/10;
+			return true;
+			case Controls::Cancel:
+				removeActive();
+			return true;
+			case Controls::Confirm:
+				addActive();
+			return true;
+			default:
+				if(action < Controls::Select0 || action > Controls::Select9)
+					return false;
+
+				selectionIndex = selectionIndex*10+action-Controls::Select0;
+				//if(selectionIndex == 0)
+				//	addActive();
+			return true;
+		}
+		return false;
+	}
+
+	static std::string getActivePath() {
+		std::stringstream ss;
+		Selection* active = selection.get();
+		while(active) {
+			Item* item = active->item;
+			ss << item->getDescription() << "/";
+			active = active->activeSelection;
+		}
+		if(selectionIndex)
+			ss << selectionIndex;
+		return ss.str();
+	}
+};
+
+
 
 void Controls::init() {
 	memset(asciiKeyBinding, 0, sizeof(asciiKeyBinding));
@@ -17,38 +110,22 @@ void Controls::init() {
 	asciiKeyBinding[10] = Action::Confirm;
 	asciiKeyBinding['u'] = Action::Primary;
 	asciiKeyBinding['i'] = Action::Secondary;
-	for(uint64_t i = 0; i < 9; i ++)
-		asciiKeyBinding['1'+i] = Action::SelectSlot+i;
+	for(uint64_t i = 0; i <= 9; i ++)
+		asciiKeyBinding['0'+i] = Action::Select0+i;
 
 	memset(ansiKeyBinding, 0, sizeof(ansiKeyBinding));
 	ansiKeyBinding['A'] = Action::Up;
 	ansiKeyBinding['B'] = Action::Down;
 	ansiKeyBinding['C'] = Action::Right;
 	ansiKeyBinding['D'] = Action::Left;
-}
 
-bool Controls::tryToSelectItemSlot(Action action) {
-	if(action < Action::SelectSlot ||
-	   action >= Action::SelectSlot+hero->inventory->items.size())
-		return false;
-
-	uint64_t index = action-Action::SelectSlot;
-	auto iterator = std::find(itemSelection.begin(), itemSelection.end(), index);
-	if(iterator != itemSelection.end()) {
-		itemSelection.erase(iterator);
-		if(itemSelection.size() == 0)
-			mode = Mode::Move;
-	}else{
-		itemSelection.push_back(index);
-		mode = Mode::ItemSelection;
-	}
-	return true;
+	selection.reset(new class Selection(hero->inventory.get()));
 }
 
 void Controls::handleInput(uint8_t* input, Action action) {
 	switch(mode) {
 		case Mode::Move: {
-			if(!tryToSelectItemSlot(action))
+			if(!Selection::handleInput(action))
 				switch(action) {
 					case Action::Up:
 					case Action::Down:
@@ -83,10 +160,10 @@ void Controls::handleInput(uint8_t* input, Action action) {
 				break;
 			}
 		} break;
-		case Mode::ItemSelection: {
-			if(!tryToSelectItemSlot(action) && action == Action::Cancel) {
+		case Mode::Selection: {
+			if(!Selection::handleInput(action) && action == Action::Cancel) {
 				mode = Mode::Move;
-				itemSelection.clear();
+				selection.reset();
 				break;
 			}
 		} break;
@@ -129,23 +206,10 @@ void Controls::doFrame() {
 			System::renderRightAlignedText(0, "Command:");
 			System::renderRightAlignedText(1, commandLine.c_str());
 		} break;
-		case Mode::ItemSelection: {
-			System::renderRightAlignedText(0, "Selected Items:");
-			float massSum = 0.0;
-			for(uint64_t i = 0; i < itemSelection.size(); i ++) {
-				uint64_t slot = itemSelection[i];
-				strcpy(buffer, hero->inventory->getSlotDescription(slot).c_str());
-				System::renderRightAlignedText(i+1, buffer);
-				Item* item = hero->inventory->getItemInSlot(slot);
-				if(item)
-					massSum += item->getMass();
-			}
-			uint64_t line = itemSelection.size()+2;
-			sprintf(buffer, "%.f Kg", massSum);
-			System::renderRightAlignedText(line, buffer);
-			System::renderRightAlignedText(line+1, "Drop");
-			System::renderRightAlignedText(line+2, "Apply");
-			System::renderRightAlignedText(line+3, "Swap");
+		case Mode::Selection: {
+			std::string str = Selection::getActivePath();
+			System::renderRightAlignedText(0, "Selection:");
+			System::renderRightAlignedText(1, str.c_str());
 		} break;
 	}
 }

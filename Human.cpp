@@ -1,7 +1,10 @@
 #include "Level.h"
 
 HumanInventory::HumanInventory() :Inventory(9) {
+	items[0].reset(new Item());
 
+	//for(uint_64_t i = 0; i < items.count(); i ++)
+	//	items[i].reset(new Item());
 }
 
 std::string HumanInventory::getDescription() const {

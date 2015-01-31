@@ -18,8 +18,7 @@ namespace Controls {
 
 	enum Mode {
 		Move,
-		Command,
-		Selection
+		Command
 	};
 
 	void init();

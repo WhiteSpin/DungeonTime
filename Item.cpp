@@ -5,7 +5,7 @@ float Item::getMass() const {
 }
 
 std::string Item::getDescription() const {
-	return "An Item";
+	return "Generic Item";
 }
 
 

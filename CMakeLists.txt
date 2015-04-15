@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0015 NEW)
+project(DungeonTime)
 
-set(NAME DungeonTime)
-
-project(${NAME})
-
-file (GLOB SOURCES *.cpp)
-
+file(GLOB SOURCES *.cpp)
+include_directories(netLink/include)
+link_directories(netLink/out)
 add_definitions(-O3 -std=c++1y)
-add_executable(${NAME} ${SOURCES})
-
+add_executable(${PROJECT_NAME} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} NetLink)

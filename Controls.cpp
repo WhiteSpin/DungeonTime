@@ -24,7 +24,7 @@ class Selection {
 			return;
 
 		std::stringstream ss;
-		ss << item->getDescription() << " |";
+		ss << item->getDescription() << " <";
 		for(uint64_t i = 0; i < depth; i ++)
 			ss << "=";
 		System::renderRightAlignedText(line ++, ss.str().c_str());
@@ -62,27 +62,29 @@ class Selection {
 				if(inventory) {
 					std::string completion = inputText;
 					std::vector<std::pair<Item*, std::string>> similar;
-					for(uint64_t i = 0; i < inventory->getSlotCount(); i ++) {
+					for(uint64_t i = 0; i < inventory->getSlotCount(); ++i) {
 						Item* item = inventory->getItemInSlot(i);
 						if(!item) continue;
 						std::string description = item->getDescription();
 						if(description.length() >= completion.length() &&
-							description.compare(0, completion.length(), completion) == 0)
+						   description.compare(0, completion.length(), completion) == 0)
 							similar.push_back(std::pair<Item*, std::string>(item, description));
 					}
-					while(true) {
-						if(similar.size() <= 1) {
-							if(similar.size() == 1) {
-								active->activeSelection = new class Selection(similar[0].first);
-								inputText = "";
-							}
+					std::sort(similar.begin(), similar.end(), [](std::pair<Item*, std::string>& a, std::pair<Item*, std::string>& b) {
+						return (bool)(a.second.length() < b.second.length());
+					});
+					while(similar.size()) {
+						if(similar.size() == 1 || similar[0].second.length() == completion.length()) {
+							active->activeSelection = new class Selection(similar[0].first);
+							inputText = "";
 							return;
-						}
-						completion += similar[0].second.begin()[0];
-						for(uint64_t i = 0; i < inventory->getSlotCount(); i ++) {
-							if(similar[i].second.length() < completion.length() ||
-								!similar[i].second.compare(0, completion.length(), completion))
-								similar.clear();
+						}else{
+							completion += similar[0].second[completion.size()];
+							for(uint64_t i = 0; i < similar.size(); ++i)
+								if(similar[i].second.compare(0, completion.length(), completion) != 0) {
+									similar.erase(similar.begin()+i);
+									--i;
+								}
 						}
 					}
 					inputText = completion;

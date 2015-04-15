@@ -135,12 +135,6 @@ void Level::generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t
 
 void Level::generate() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
-	generateXSplitRoom(1, 1, 15, 9);
-	generateYSplitRoom(25, 1, 15, 9);
-	generateEllipseRoom(20, 13, 7, 4);
-	generateXCorridor(15, 2, 11, 3);
-	generateYCorridor(19, 4, 3, 6);
-	//generateLine(45, 1, 55, 15, BACKGROUD_CORRIDOR);
-	//generateRoom(8, 2, 9, 4);
-	//generateRoom(8, 2, 9, 4);
+	generateXSplitRoom(width/2, height/2, width/4+1, height/4+1);
+	memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
 }

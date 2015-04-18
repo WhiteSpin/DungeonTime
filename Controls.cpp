@@ -70,7 +70,7 @@ class Selection {
 						   description.compare(0, completion.length(), completion) == 0)
 							similar.push_back(std::pair<Item*, std::string>(item, description));
 					}
-					std::sort(similar.begin(), similar.end(), [](std::pair<Item*, std::string>& a, std::pair<Item*, std::string>& b) {
+					std::sort(similar.begin(), similar.end(), [](std::pair<Item*, std::string> a, std::pair<Item*, std::string> b) {
 						return (bool)(a.second.length() < b.second.length());
 					});
 					while(similar.size()) {

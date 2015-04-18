@@ -5,32 +5,13 @@ Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
 	level->entities.push_back(std::unique_ptr<Entity>(this));
 }
 
-bool Entity::die() {
-	health = 0.0;
+bool Entity::destroy() {
 	for(uint64_t i = 0; i < level->entities.size(); ++i)
 		if(level->entities[i].get() == this) {
 			level->entities.erase(level->entities.begin()+i);
 			return true;
 		}
 	return false;
-}
-
-bool Entity::hurt(float damage) {
-	health -= damage;
-	if(health <= 0.0)
-		return die();
-	return false;
-}
-
-float Entity::heal(float value) {
-	if(health+value > maxHealth) {
-		value = maxHealth-health;
-		health = maxHealth;
-		return value;
-	}else{
-		health += value;
-		return 0.0;
-	}
 }
 
 void Entity::doFrame() {
@@ -77,3 +58,31 @@ bool Entity::handleAction(Controls::Action input) {
 		return false;
 	}
 }
+
+LivingEntity::LivingEntity(Level* _level, uint64_t _posX, uint64_t _posY)
+	:Entity(_level, _posX, _posY) {
+}
+
+bool LivingEntity::destroy() {
+	health = 0.0;
+	return Entity::destroy();
+}
+
+bool LivingEntity::hurt(float damage) {
+	health -= damage;
+	if(health <= 0.0)
+		return destroy();
+	return false;
+}
+
+float LivingEntity::heal(float value) {
+	if(health+value > maxHealth) {
+		value = maxHealth-health;
+		health = maxHealth;
+		return value;
+	}else{
+		health += value;
+		return 0.0;
+	}
+}
+

@@ -7,7 +7,7 @@ class HumanInventory : public Inventory {
 	virtual std::string getSlotName(uint64_t slot) const;
 };
 
-class Human : public Entity {
+class Human : public LivingEntity {
 	public:
 	Human(Level* level, uint64_t posX, uint64_t posY);
 };

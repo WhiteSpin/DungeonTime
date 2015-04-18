@@ -1,9 +1,9 @@
 #include "Level.h"
 
 HumanInventory::HumanInventory() :Inventory(9) {
-	items[0].reset(new Item());
-	items[3].reset(new Item());
-	items[5].reset(new Item());
+	items[0].reset(new Weapon());
+	items[3].reset(new Weapon());
+	items[5].reset(new Weapon());
 
 	//for(uint_64_t i = 0; i < items.count(); i ++)
 	//	items[i].reset(new Item());
@@ -30,6 +30,6 @@ std::string HumanInventory::getSlotName(uint64_t slot) const {
 
 
 
-Human::Human(Level* _level, uint64_t _posX, uint64_t _posY) :Entity(_level, _posX, _posY) {
+Human::Human(Level* _level, uint64_t _posX, uint64_t _posY) :LivingEntity(_level, _posX, _posY) {
 	inventory.reset(new HumanInventory());
 }

@@ -1,18 +1,12 @@
 #include "Level.h"
 
-float Item::getMass() const {
-	return 1.0;
-}
-
-std::string Item::getDescription() const {
-	return "Generic Item";
-}
-
-
-
 Inventory::Inventory(uint64_t slots) {
 	for(uint64_t i = 0; i < slots; i ++)
 		items.push_back(std::unique_ptr<Item>());
+}
+
+uint8_t Inventory::getApperance() const {
+	return 0;
 }
 
 std::string Inventory::getDescription() const {
@@ -29,4 +23,22 @@ std::string Inventory::getSlotName(uint64_t slot) const {
 
 Item* Inventory::getItemInSlot(uint64_t slot) const {
 	return items[slot].get();
+}
+
+std::string Weapon::getDescription() const {
+	const char* descriptions[] = {
+		"Bow","Sword","Axe"	
+	};
+	return descriptions[type];
+}
+
+uint8_t Weapon::getApperance() const {
+	const uint8_t apperances[] = {
+		'(','/','p'
+	};
+	return apperances[type];
+}
+
+float Weapon::getDamage() const {
+	return 0;
 }

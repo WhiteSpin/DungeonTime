@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0015 NEW)
 project(DungeonTime)
 
-file(GLOB SOURCES *.cpp)
+aux_source_directory(src/ SOURCES)
 include_directories(netLink/include)
 link_directories(netLink/out)
 add_definitions(-O3 -std=c++1y)

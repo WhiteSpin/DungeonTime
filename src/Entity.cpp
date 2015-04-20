@@ -18,98 +18,40 @@ void Entity::doFrame() {
 	printf("@");
 }
 
-int Entity::canEnter(uint64_t posX, uint64_t posY) {
+bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
+	//TODO: Handle entities
 	switch(level->getBackgroundAt(posX, posY)) {
-		case BACKGROUD_FLOOR:
-			return 1;
-		case BACKGROUD_OPEN_DOOR:
-			return 1;
 		case BACKGROUD_CLOSED_DOOR:
-			return 2;
+			level->setBackgroundAt(posX, posY, BACKGROUD_OPEN_DOOR);
+			Message::push(std::string("The door opens"));
+		case BACKGROUD_FLOOR:
+		case BACKGROUD_OPEN_DOOR:
+			return true;
 	}
-	return 0;
+	return false;
 }
 
 bool Entity::handleAction(Controls::Action input) {
 	switch(input) {
-
 		case Controls::Up:
-		if(posY > 0) {
-			int EnterStatus = canEnter(posX, posY-1);
-			switch(EnterStatus) {
-				case 1:
-					posY --;
-					return true;
-				case 2:
-					posY --;
-					Message::push(std::string("The door opens"));
-					return true;
-				default:
-					return false;
-			}
-
-		}
-		else
-			return false;
-
+			if(posY > 0 && tryToEnter(posX, posY-1))
+				posY --;
+			return true;
 		case Controls::Down:
-		if(posY < level->height-1) {
-			int EnterStatus = canEnter(posX, posY+1);
-			switch(EnterStatus) {
-				case 1:
-					posY ++;
-					return true;
-				case 2:
-					posY ++;
-					Message::push(std::string("The door opens"));
-					return true;
-				default:
-					return false;
-			}
-		}
-		else
-			return false;
-
+			if(posY < level->height-1 && tryToEnter(posX, posY+1))
+				posY ++;
+			return true;
 		case Controls::Left:
-		if(posX > 0) {
-			int EnterStatus = canEnter(posX-1, posY);
-			switch(EnterStatus) {
-				case 1:
-					posX --;
-					return true;
-				case 2:
-					posX --;
-					Message::push(std::string("The door opens"));
-					return true;
-				default:
-					return false;
-			}
-		}
-		else
-			return false;
-
+			if(posX > 0 && tryToEnter(posX-1, posY))
+				posX --;
+			return true;
 		case Controls::Right:
-		if(posX < level->width-1)  {
-			int EnterStatus = canEnter(posX+1, posY);
-			switch(EnterStatus) {
-				case 1:
-					posX ++;
-					return true;
-				case 2:
-					posX ++;
-					level->setBackgroundAt(posX, posY, BACKGROUD_OPEN_DOOR);
-					Message::push(std::string("The door opens"));
-					return true;
-				default:
-					return false;
-			}
-		}
-		else
-			return false;
-
+			if(posX < level->width-1 && tryToEnter(posX+1, posY))
+				posX ++;
+			return true;
 		default:
-		Message::push(std::string("Unknown command!"));
-		return false;
+			Message::push(std::string("Unknown command!"));
+			return false;
 	}
 }
 
@@ -139,4 +81,3 @@ float LivingEntity::heal(float value) {
 		return 0.0;
 	}
 }
-

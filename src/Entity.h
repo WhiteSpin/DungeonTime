@@ -9,7 +9,7 @@ class Entity {
 	Entity(Level* level, uint64_t posX, uint64_t posY);
 	virtual bool destroy();
 	void doFrame();
-	int canEnter(uint64_t posX, uint64_t posY);
+	bool tryToEnter(uint64_t posX, uint64_t posY);
 	virtual bool handleAction(Controls::Action input);
 };
 

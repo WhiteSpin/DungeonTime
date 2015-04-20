@@ -46,9 +46,9 @@ uint8_t Weapon::getApperance() const {
 	return apperances[type];
 }
 
-float Weapon::getDamage() const {
-	const float damages[] = {
-		2.0,5.0,8.0
+int Weapon::getDamage() const {
+	const int damages[] = {
+		2,5,8
 	};
 	return damages[type];
 }

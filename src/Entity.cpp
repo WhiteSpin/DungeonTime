@@ -86,21 +86,21 @@ LivingEntity::LivingEntity(Level* _level, uint64_t _posX, uint64_t _posY)
 	health = maxHealth;
 }
 
-bool LivingEntity::hurt(float damage) {
+bool LivingEntity::hurt(int damage) {
 	health -= damage;
 	//Message::push(std::to_string(health));
-	if(health <= 0.0)
+	if(health <= 0)
 		return destroy();
 	return false;
 }
 
-float LivingEntity::heal(float value) {
+int LivingEntity::heal(int value) {
 	if(health+value > maxHealth) {
 		value = maxHealth-health;
 		health = maxHealth;
 		return value;
 	}else{
 		health += value;
-		return 0.0;
+		return 0;
 	}
 }

@@ -30,5 +30,5 @@ class Weapon : public Item {
 	Weapon(WeaponType type);
 	virtual std::string getDescription() const;
 	virtual uint8_t getApperance() const;
-	virtual float getDamage() const;
+	virtual int getDamage() const;
 };

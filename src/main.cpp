@@ -5,9 +5,10 @@ int main(int argc, const char** argv) {
 	level.reset(new Level());
 	hero = new Human(level.get(), level->width/2+1, level->height/2+1);
 	hero->name = "The Chosen One";
+	hero->inventory->setItemInSlot(new Weapon(Weapon::WeaponType::Axe), 0);
 	auto otherGuy = new LivingEntity(level.get(), level->width/2+2, level->height/2+1);
 	otherGuy->name = "The Other One";
-	otherGuy->friendly = true;
+	otherGuy->friendly = false;
 
 	Controls::init();
 

@@ -16,6 +16,7 @@ class Inventory : public Item {
 	virtual std::string getDescription() const;
 	virtual uint64_t getSlotCount() const;
 	virtual std::string getSlotName(uint64_t slot) const;
+	void setItemInSlot(Item* item, uint64_t slot);
 	Item* getItemInSlot(uint64_t slot) const;
 };
 
@@ -26,6 +27,7 @@ class Weapon : public Item {
 		Sword,
 		Axe		
 	} type;
+	Weapon(WeaponType type);
 	virtual std::string getDescription() const;
 	virtual uint8_t getApperance() const;
 	virtual float getDamage() const;

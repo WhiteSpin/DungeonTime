@@ -5,13 +5,15 @@ Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
 	level->entities.push_back(std::unique_ptr<Entity>(this));
 }
 
-Entity::~Entity() {
+bool Entity::destroy() {
 	for(uint64_t i = 0; i < level->entities.size(); ++i)
 		if(level->entities[i].get() == this) {
 			level->entities.erase(level->entities.begin()+i);
-			return;
+			return true;
 		}
+	return false;
 }
+
 
 void Entity::doFrame() {
 	printf("@");
@@ -27,7 +29,15 @@ bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
 				return false;
 			}
 			else {
-				Message::push(std::string("You hit ") + livingEntityAtPos->name);
+				Message::push(std::string("You hit ") + (livingEntityAtPos->name));
+				Weapon* weapon = dynamic_cast<Weapon*>(inventory->getItemInSlot(0));
+				if(weapon) {
+					Message::push(livingEntityAtPos->name + " -" + std::to_string(weapon->getDamage()));
+					if(livingEntityAtPos->hurt(weapon->getDamage())) {
+						Message::push("You kill " + livingEntityAtPos->name);
+					}
+				}
+				return false;
 			}
 		}
 		else {	
@@ -72,13 +82,16 @@ bool Entity::handleAction(Controls::Action input) {
 }
 
 LivingEntity::LivingEntity(Level* _level, uint64_t _posX, uint64_t _posY)
-	:Entity(_level, _posX, _posY) {
+	:Entity(_level, _posX, _posY), maxHealth(12.0) {
+	health = maxHealth;
 }
 
-void LivingEntity::hurt(float damage) {
+bool LivingEntity::hurt(float damage) {
 	health -= damage;
+	//Message::push(std::to_string(health));
 	if(health <= 0.0)
-		delete this;
+		return destroy();
+	return false;
 }
 
 float LivingEntity::heal(float value) {

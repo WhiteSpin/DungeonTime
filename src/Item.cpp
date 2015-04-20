@@ -21,8 +21,15 @@ std::string Inventory::getSlotName(uint64_t slot) const {
 	return std::to_string(slot+1);
 }
 
+void Inventory::setItemInSlot(Item* item, uint64_t slot) {
+	items[slot].reset(item);
+}
+
 Item* Inventory::getItemInSlot(uint64_t slot) const {
 	return items[slot].get();
+}
+
+Weapon::Weapon(WeaponType _type) :type(_type) {
 }
 
 std::string Weapon::getDescription() const {
@@ -40,5 +47,8 @@ uint8_t Weapon::getApperance() const {
 }
 
 float Weapon::getDamage() const {
-	return 0;
+	const float damages[] = {
+		2.0,5.0,8.0
+	};
+	return damages[type];
 }

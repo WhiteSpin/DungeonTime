@@ -1,7 +1,7 @@
 #include "Level.h"
 
 std::unique_ptr<Level> level;
-Entity* hero;
+LivingEntity* hero;
 
 Level::Level() :width(75), height(25), background((uint8_t*)malloc(width * height)) {
 	generate();

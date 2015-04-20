@@ -18,6 +18,8 @@ class LivingEntity : public Entity {
 	Level* level;
 	uint64_t posX, posY;
 	float health, maxHealth;
+	bool friendly;
+	std::string name;
 	std::unique_ptr<Inventory> inventory;
 	LivingEntity(Level* level, uint64_t posX, uint64_t posY);
 	void hurt(float damage);

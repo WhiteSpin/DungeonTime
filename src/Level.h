@@ -33,4 +33,4 @@ class Level {
 };
 
 extern std::unique_ptr<Level> level;
-extern Entity* hero;
+extern LivingEntity* hero;

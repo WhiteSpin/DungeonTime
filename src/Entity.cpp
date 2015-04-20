@@ -18,7 +18,24 @@ void Entity::doFrame() {
 }
 
 bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
-	//TODO: Handle entities
+	Entity* entityAtPos = level->getEntityAt(posX, posY);
+	if(entityAtPos) {
+		LivingEntity* livingEntityAtPos = dynamic_cast<LivingEntity*>(entityAtPos);
+		if(livingEntityAtPos) {
+			if(livingEntityAtPos->friendly) {
+				Message::push(std::string("Greetings traveler, I once was an adventurer like you, but then I took an arrow to the knee"));
+				return false;
+			}
+			else {
+				Message::push(std::string("You hit ") + livingEntityAtPos->name);
+			}
+		}
+		else {	
+			//TODO deal with non-living Entities
+		}
+
+		
+	}
 	switch(level->getBackgroundAt(posX, posY)) {
 		case BACKGROUD_CLOSED_DOOR:
 			level->setBackgroundAt(posX, posY, BACKGROUD_OPEN_DOOR);

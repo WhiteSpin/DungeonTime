@@ -7,7 +7,7 @@ class Entity {
 	std::unique_ptr<Inventory> inventory;
 
 	Entity(Level* level, uint64_t posX, uint64_t posY);
-	virtual bool destroy();
+	virtual ~Entity();
 	void doFrame();
 	bool tryToEnter(uint64_t posX, uint64_t posY);
 	virtual bool handleAction(Controls::Action input);
@@ -20,7 +20,6 @@ class LivingEntity : public Entity {
 	float health, maxHealth;
 	std::unique_ptr<Inventory> inventory;
 	LivingEntity(Level* level, uint64_t posX, uint64_t posY);
-	virtual bool destroy();
-	bool hurt(float damage);
+	void hurt(float damage);
 	float heal(float value);
 };

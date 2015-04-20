@@ -5,13 +5,12 @@ Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
 	level->entities.push_back(std::unique_ptr<Entity>(this));
 }
 
-bool Entity::destroy() {
+Entity::~Entity() {
 	for(uint64_t i = 0; i < level->entities.size(); ++i)
 		if(level->entities[i].get() == this) {
 			level->entities.erase(level->entities.begin()+i);
-			return true;
+			return;
 		}
-	return false;
 }
 
 void Entity::doFrame() {
@@ -59,16 +58,10 @@ LivingEntity::LivingEntity(Level* _level, uint64_t _posX, uint64_t _posY)
 	:Entity(_level, _posX, _posY) {
 }
 
-bool LivingEntity::destroy() {
-	health = 0.0;
-	return Entity::destroy();
-}
-
-bool LivingEntity::hurt(float damage) {
+void LivingEntity::hurt(float damage) {
 	health -= damage;
 	if(health <= 0.0)
-		return destroy();
-	return false;
+		delete this;
 }
 
 float LivingEntity::heal(float value) {

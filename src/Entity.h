@@ -7,19 +7,23 @@ class Entity {
 	std::unique_ptr<Inventory> inventory;
 	Entity(Level* level, uint64_t posX, uint64_t posY);
 	virtual bool destroy();
-	void doFrame();
+	virtual void doFrame();
 	bool tryToEnter(uint64_t posX, uint64_t posY);
 	virtual bool handleAction(Controls::Action input);
 };
 
 class LivingEntity : public Entity {
 	public:
-	Level* level;
-	uint64_t posX, posY;
 	int health, maxHealth;
 	bool friendly;
 	std::string name;
 	LivingEntity(Level* level, uint64_t posX, uint64_t posY);
 	bool hurt(int damage);
 	int heal(int value);
+};
+
+class ItemContainer : public Entity {
+	public:
+	ItemContainer(Level* lvel, uint64_t posX, uint64_t posY, std::unique_ptr<Inventory> inventory);
+	virtual void doFrame();
 };

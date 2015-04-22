@@ -1,4 +1,6 @@
 #include "Level.h"
+#include "greetings.h"
+	
 
 Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
 	:level(_level), posX(_posX), posY(_posY) {
@@ -14,7 +16,6 @@ bool Entity::destroy() {
 	return false;
 }
 
-
 void Entity::doFrame() {
 	printf("@");
 }
@@ -25,7 +26,7 @@ bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
 		LivingEntity* livingEntityAtPos = dynamic_cast<LivingEntity*>(entityAtPos);
 		if(livingEntityAtPos) {
 			if(livingEntityAtPos->friendly) {
-				Message::push(std::string("Greetings traveler, I once was an adventurer like you, but then I took an arrow to the knee"));
+				Message::push(get_random_greeting());
 				return false;
 			}
 			else {
@@ -40,11 +41,9 @@ bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
 				return false;
 			}
 		}
-		else {	
+		else {
 			//TODO deal with non-living Entities
 		}
-
-		
 	}
 	switch(level->getBackgroundAt(posX, posY)) {
 		case BACKGROUD_CLOSED_DOOR:
@@ -89,8 +88,11 @@ LivingEntity::LivingEntity(Level* _level, uint64_t _posX, uint64_t _posY)
 bool LivingEntity::hurt(int damage) {
 	health -= damage;
 	//Message::push(std::to_string(health));
-	if(health <= 0)
+	if(health <= 0) {
+		Message::push(inventory ? "True":"False");
+		auto container = new ItemContainer(level, posX, posY, std::move(inventory));
 		return destroy();
+	}
 	return false;
 }
 
@@ -102,5 +104,23 @@ int LivingEntity::heal(int value) {
 	}else{
 		health += value;
 		return 0;
+	}
+}
+
+
+ItemContainer::ItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std::unique_ptr<Inventory> _inventory)
+	:Entity(_level, _posX, _posY) {
+	inventory = std::move(_inventory);
+}
+
+void ItemContainer::doFrame() {
+	//printf("%d",inventory->items.size());
+	return;
+	for(size_t i = 0; i < inventory->items.size(); ++i) {
+		auto item = inventory->items[i].get();
+		if(!item)
+			continue;
+		printf("%c", item->getApperance());
+		break;
 	}
 }

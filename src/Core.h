@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <time.h>
 #include "netLink.h"
 
 class Item;

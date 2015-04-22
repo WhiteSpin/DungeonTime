@@ -9,6 +9,9 @@ int main(int argc, const char** argv) {
 	auto otherGuy = new LivingEntity(level.get(), level->width/2+2, level->height/2+1);
 	otherGuy->name = "The Other One";
 	otherGuy->friendly = false;
+	auto thirdGuy = new LivingEntity(level.get(), level->width/2+13, level->height/2+1);
+	thirdGuy->name = "The Other Other One";
+	thirdGuy->friendly = true;
 
 	Controls::init();
 

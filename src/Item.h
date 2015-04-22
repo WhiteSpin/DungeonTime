@@ -11,6 +11,7 @@ class Item {
 class Inventory : public Item {
 	public:
 	std::vector<std::unique_ptr<Item>> items;
+	Inventory();
 	Inventory(uint64_t slots);
 	virtual uint8_t getApperance() const;
 	virtual std::string getDescription() const;

@@ -5,6 +5,7 @@
 Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
 	:level(_level), posX(_posX), posY(_posY) {
 	level->entities.push_back(std::unique_ptr<Entity>(this));
+	inventory.reset(new Inventory);
 }
 
 bool Entity::destroy() {
@@ -114,13 +115,13 @@ ItemContainer::ItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std:
 }
 
 void ItemContainer::doFrame() {
-	//printf("%d",inventory->items.size());
-	return;
 	for(size_t i = 0; i < inventory->items.size(); ++i) {
 		auto item = inventory->items[i].get();
 		if(!item)
 			continue;
 		printf("%c", item->getApperance());
-		break;
+		return;
 	}
+	printf("%c",level->getBackgroundAt(posX,posY));
+	return;
 }

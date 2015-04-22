@@ -1,5 +1,8 @@
 #include "Level.h"
 
+Inventory::Inventory() {
+}
+
 Inventory::Inventory(uint64_t slots) {
 	for(uint64_t i = 0; i < slots; i ++)
 		items.push_back(std::unique_ptr<Item>());

@@ -10,6 +10,6 @@ const std::string greetings[] = {"Greetings traveler, I once was an adventurer l
 std::string get_random_greeting() {
 	srand(time(NULL));
 	int l = sizeof(greetings)/sizeof(greetings[0]);
-	int randIndex = srand() % l;
+	int randIndex = rand() % l;
 	return greetings[randIndex];		
 }

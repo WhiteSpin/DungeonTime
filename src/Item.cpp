@@ -53,21 +53,21 @@ Weapon::Weapon(WeaponType _type) :type(_type) {
 
 std::string Weapon::getDescription() const {
 	const char* descriptions[] = {
-		"Bow","Sword","Axe"	
+		"Bow", "Sword", "Axe"
 	};
 	return descriptions[type];
 }
 
 uint8_t Weapon::getApperance() const {
 	const uint8_t apperances[] = {
-		'(','/','p'
+		'(', '/', 'p'
 	};
 	return apperances[type];
 }
 
 int Weapon::getDamage() const {
 	const int damages[] = {
-		2,5,8
+		2, 5, 8
 	};
 	return damages[type];
 }

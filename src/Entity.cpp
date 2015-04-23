@@ -1,11 +1,10 @@
 #include "Level.h"
-#include "greetings.h"
-	
+#include "Greetings.h"
+
 
 Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
 	:level(_level), posX(_posX), posY(_posY) {
 	level->entities.push_back(std::unique_ptr<Entity>(this));
-	inventory.reset(new Inventory);
 }
 
 bool Entity::destroy() {
@@ -30,8 +29,7 @@ bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
 				livingEntityAtPos->willTalk = false;
 			}
 			return false;
-		}
-		else {
+		}else{
 			Message::push(std::string("You hit ") + (livingEntityAtPos->name));
 			Weapon* weapon = dynamic_cast<Weapon*>(inventory->getItemInSlot(0));
 			if(weapon) {
@@ -42,14 +40,13 @@ bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
 			}
 			return false;
 		}
-	}
-	else {
+	}else{
 		ItemContainer* ItemContainerAtPos = level->getItemContainerAt(posX, posY);
 		if(ItemContainerAtPos && ItemContainerAtPos->inventory->getFilledSlotsCount() > 0) {
 			ItemContainerAtPos->inventory->printFilledSlots();
 		}
 	}
-	
+
 	switch(level->getBackgroundAt(posX, posY)) {
 		case BACKGROUD_CLOSED_DOOR:
 			level->setBackgroundAt(posX, posY, BACKGROUD_OPEN_DOOR);
@@ -93,9 +90,8 @@ LivingEntity::LivingEntity(Level* _level, uint64_t _posX, uint64_t _posY)
 
 bool LivingEntity::hurt(int damage) {
 	health -= damage;
-	//Message::push(std::to_string(health));
 	if(health <= 0) {
-		if (inventory->getFilledSlotsCount() != 0) {
+		if(inventory->getFilledSlotsCount() != 0) {
 			Message::push("Passing on");
 			auto container = new ItemContainer(level, posX, posY, std::move(inventory));
 		}
@@ -118,42 +114,19 @@ int LivingEntity::heal(int value) {
 
 ItemContainer::ItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std::unique_ptr<Inventory> _inventory)
 	:Entity(_level, _posX, _posY) {
-	Entity* ItemContainerAtPos = level->getItemContainerAt(posX, posY);
-	if (ItemContainerAtPos && ItemContainerAtPos->inventory->getFilledSlotsCount()!= 0) {
-		auto mergedInventory = std::unique_ptr<Inventory>(new Inventory(_inventory->getFilledSlotsCount()+ItemContainerAtPos->inventory->getFilledSlotsCount()));
-		int mergedInventoryPos = 0;
-		for(int i = 0; i < _inventory->getSlotCount(); ++i) {
-			Item* itemInSlot = _inventory->getItemInSlot(i);
-			if (itemInSlot) {
-				mergedInventory->setItemInSlot(std::move(itemInSlot),mergedInventoryPos);
-				mergedInventoryPos++;	
-			}
+	inventory = std::move(_inventory);
+
+	Entity* itemContainerAtPos = level->getItemContainerAt(posX, posY);
+	if(itemContainerAtPos) {
+		Message::push("merge");
+		Message::push(std::to_string(itemContainerAtPos->inventory->getSlotCount()));
+		for(uint64_t i = 0; i < itemContainerAtPos->inventory->getSlotCount(); ++i) {
+			auto itemInSlot = std::move(itemContainerAtPos->inventory->items[i]);
+			if(itemInSlot)
+				Message::push(itemContainerAtPos->inventory->items[i]->getDescription());
+				//inventory->items.push_back(std::move(itemInSlot));
 		}
-		Message::push("1:");
-		mergedInventory->printFilledSlots();
-		for(int i = 0; i < ItemContainerAtPos->inventory->getSlotCount(); ++i) {
-			Item* itemInSlot = ItemContainerAtPos->inventory->getItemInSlot(i);
-			if (itemInSlot) {
-				mergedInventory->setItemInSlot(std::move(itemInSlot),mergedInventoryPos);
-				mergedInventoryPos++;	
-			}
-		}
-		
-		for(uint64_t i = 0; i < level->entities.size(); ++i) {
-			if(level->entities[i].get() == ItemContainerAtPos) {
-				//level->entities.erase(level->entities.begin()+i);
-				Message::push("Now they come");
-				(*(level->entities.begin()+i))->inventory->printFilledSlots();
-			}
-		}
-		//ItemContainerAtPos->inventory.reset();
-		ItemContainerAtPos->destroy();
-		Message::push("2:");
-		mergedInventory->printFilledSlots();
-		inventory = std::move(mergedInventory);
-	}
-	else {
-		inventory = std::move(_inventory);
+		itemContainerAtPos->destroy();
 	}
 }
 
@@ -166,6 +139,4 @@ void ItemContainer::doFrame() {
 		return;
 	}
 	//printf("%c",level->getBackgroundAt(posX,posY));
-	//destroy();
-   	return;
 }

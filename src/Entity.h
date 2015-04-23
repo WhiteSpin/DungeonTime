@@ -25,6 +25,6 @@ class LivingEntity : public Entity {
 
 class ItemContainer : public Entity {
 	public:
-	ItemContainer(Level* lvel, uint64_t posX, uint64_t posY, std::unique_ptr<Inventory> inventory);
+	ItemContainer(Level* level, uint64_t posX, uint64_t posY, std::unique_ptr<Inventory> inventory);
 	virtual void doFrame();
 };

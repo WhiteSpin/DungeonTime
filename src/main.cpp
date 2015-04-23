@@ -12,7 +12,7 @@ int main(int argc, const char** argv) {
 	otherGuy->name = "The Other One";
 	otherGuy->friendly = false;
 
-	/*auto yetanotherguy = new LivingEntity(level.get(), level->width/2+2, level->height/2+4);
+	auto yetanotherguy = new LivingEntity(level.get(), level->width/2+2, level->height/2+4);
 	yetanotherguy->name = "The One With No Items";
 	yetanotherguy->friendly = false;
 
@@ -24,9 +24,6 @@ int main(int argc, const char** argv) {
 	inv->setItemInSlot(new Weapon(Weapon::WeaponType::Sword),0);
 	inv->setItemInSlot(new Weapon(Weapon::WeaponType::Bow),1);
 	auto container = new ItemContainer(level.get(), otherGuy->posX, otherGuy->posY, std::unique_ptr<Inventory>(inv));
-	container->inventory->setItemInSlot(new Weapon(Weapon::WeaponType::Sword),0);
-	container->inventory->setItemInSlot(new Weapon(Weapon::WeaponType::Bow),1);*/
-
 	Controls::init();
 	while(true) {
 		System::doFrame();

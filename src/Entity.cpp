@@ -91,10 +91,8 @@ LivingEntity::LivingEntity(Level* _level, uint64_t _posX, uint64_t _posY)
 bool LivingEntity::hurt(int damage) {
 	health -= damage;
 	if(health <= 0) {
-		if(inventory->getFilledSlotsCount() != 0) {
-			Message::push("Passing on");
+		if(inventory && inventory->getFilledSlotsCount() != 0)
 			auto container = new ItemContainer(level, posX, posY, std::move(inventory));
-		}
 		return destroy();
 	}
 	return false;
@@ -116,15 +114,12 @@ ItemContainer::ItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std:
 	:Entity(_level, _posX, _posY) {
 	inventory = std::move(_inventory);
 
-	Entity* itemContainerAtPos = level->getItemContainerAt(posX, posY);
+	Entity* itemContainerAtPos = level->getItemContainerAt(posX, posY, this);
 	if(itemContainerAtPos) {
-		Message::push("merge");
-		Message::push(std::to_string(itemContainerAtPos->inventory->getSlotCount()));
 		for(uint64_t i = 0; i < itemContainerAtPos->inventory->getSlotCount(); ++i) {
 			auto itemInSlot = std::move(itemContainerAtPos->inventory->items[i]);
 			if(itemInSlot)
-				Message::push(itemContainerAtPos->inventory->items[i]->getDescription());
-				//inventory->items.push_back(std::move(itemInSlot));
+				inventory->items.push_back(std::move(itemInSlot));
 		}
 		itemContainerAtPos->destroy();
 	}

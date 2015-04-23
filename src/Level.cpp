@@ -37,21 +37,21 @@ Entity* Level::getPrimeEntityAt(uint64_t posX, uint64_t posY) const {
 	return getItemContainerAt(posX, posY);
 }
 
-LivingEntity* Level::getLivingEntityAt(uint64_t posX, uint64_t posY) const {
+LivingEntity* Level::getLivingEntityAt(uint64_t posX, uint64_t posY, Entity* exceptFrom) const {
 	for(uint64_t i = 0; i < entities.size(); ++i)
 		if(entities[i]->posX == posX && entities[i]->posY == posY) {
 			auto livingEntityAtPos = dynamic_cast<LivingEntity*>(entities[i].get());
-			if (livingEntityAtPos)
+			if (livingEntityAtPos && livingEntityAtPos != exceptFrom)
 				return livingEntityAtPos;
 		}
 	return NULL;
 }
 
-ItemContainer* Level::getItemContainerAt(uint64_t posX, uint64_t posY) const {
+ItemContainer* Level::getItemContainerAt(uint64_t posX, uint64_t posY, Entity* exceptFrom) const {
 	for(uint64_t i = 0; i < entities.size(); ++i)
 		if(entities[i]->posX == posX && entities[i]->posY == posY) {
 			auto itemContainerAtPos = dynamic_cast<ItemContainer*>(entities[i].get());
-			if (itemContainerAtPos)
+			if (itemContainerAtPos && itemContainerAtPos != exceptFrom)
 				return itemContainerAtPos;
 		}
 	return NULL;

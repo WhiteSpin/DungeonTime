@@ -11,13 +11,14 @@ class Item {
 class Inventory : public Item {
 	public:
 	std::vector<std::unique_ptr<Item>> items;
-	Inventory();
-	Inventory(uint64_t slots);
+	Inventory(uint64_t slots=0);
 	virtual uint8_t getApperance() const;
 	virtual std::string getDescription() const;
 	virtual uint64_t getSlotCount() const;
 	virtual std::string getSlotName(uint64_t slot) const;
 	void setItemInSlot(Item* item, uint64_t slot);
+	uint64_t getFilledSlotsCount() const;
+	void printFilledSlots() const;
 	Item* getItemInSlot(uint64_t slot) const;
 };
 

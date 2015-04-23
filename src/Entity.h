@@ -16,6 +16,7 @@ class LivingEntity : public Entity {
 	public:
 	int health, maxHealth;
 	bool friendly;
+	bool willTalk;
 	std::string name;
 	LivingEntity(Level* level, uint64_t posX, uint64_t posY);
 	bool hurt(int damage);

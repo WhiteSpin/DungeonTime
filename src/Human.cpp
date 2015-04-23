@@ -3,7 +3,7 @@
 HumanInventory::HumanInventory() :Inventory(9) {
 	items[0].reset(new Weapon(Weapon::WeaponType::Axe));
 	items[3].reset(new Weapon(Weapon::WeaponType::Bow));
-	items[5].reset(new Weapon(Weapon::WeaponType::Sword));
+	//items[5].reset(new Weapon(Weapon::WeaponType::Sword));
 
 	//for(uint_64_t i = 0; i < items.count(); i ++)
 	//	items[i].reset(new Item());

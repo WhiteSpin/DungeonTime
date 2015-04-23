@@ -16,7 +16,9 @@ class Level {
 	Level();
 	~Level();
 	void doFrame();
-	Entity* getEntityAt(uint64_t posX, uint64_t posY) const;
+	Entity* getPrimeEntityAt(uint64_t posX, uint64_t posY) const;
+	LivingEntity* getLivingEntityAt(uint64_t posX, uint64_t posY) const;
+	ItemContainer* getItemContainerAt(uint64_t posX, uint64_t posY) const;
 	uint8_t getBackgroundAt(uint64_t posX, uint64_t posY) const;
 	void setBackgroundAt(uint64_t posX, uint64_t posY, uint8_t type);
 	void fillBackgroundRow(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type);

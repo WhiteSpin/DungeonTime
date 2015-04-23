@@ -92,7 +92,7 @@ double System::getTime() {
 
 void System::doFrame() {
 	fflush(stdout);
-	const size_t fps = 10;
+	const size_t fps = 7;
 	usleep(1000000/fps);
 
 	struct winsize newScreenSize;

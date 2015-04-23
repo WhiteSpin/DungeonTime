@@ -17,7 +17,7 @@ void Level::doFrame() {
 	for(uint64_t y = 0; y < maxY; ++y) {
 		System::setCursorPosition(0, y);
 		for(uint64_t x = 0; x < maxX; ++x) {
-			auto entity = getEntityAt(x, y);
+			auto entity = getPrimeEntityAt(x, y);
 			if(entity)
 				entity->doFrame();
 			else
@@ -26,10 +26,34 @@ void Level::doFrame() {
 	}
 }
 
-Entity* Level::getEntityAt(uint64_t posX, uint64_t posY) const {
+Entity* Level::getPrimeEntityAt(uint64_t posX, uint64_t posY) const {
 	for(uint64_t i = 0; i < entities.size(); ++i)
-		if(entities[i]->posX == posX && entities[i]->posY == posY)
-			return entities[i].get();
+		if(entities[i]->posX == posX && entities[i]->posY == posY) {
+			Entity* LivingEntityAtPos = dynamic_cast<LivingEntity*>(entities[i].get());
+			if(LivingEntityAtPos)
+				return LivingEntityAtPos;
+		}
+				
+	return getItemContainerAt(posX, posY);
+}
+
+LivingEntity* Level::getLivingEntityAt(uint64_t posX, uint64_t posY) const {
+	for(uint64_t i = 0; i < entities.size(); ++i)
+		if(entities[i]->posX == posX && entities[i]->posY == posY) {
+			auto livingEntityAtPos = dynamic_cast<LivingEntity*>(entities[i].get());
+			if (livingEntityAtPos)
+				return livingEntityAtPos;
+		}
+	return NULL;
+}
+
+ItemContainer* Level::getItemContainerAt(uint64_t posX, uint64_t posY) const {
+	for(uint64_t i = 0; i < entities.size(); ++i)
+		if(entities[i]->posX == posX && entities[i]->posY == posY) {
+			auto itemContainerAtPos = dynamic_cast<ItemContainer*>(entities[i].get());
+			if (itemContainerAtPos)
+				return itemContainerAtPos;
+		}
 	return NULL;
 }
 

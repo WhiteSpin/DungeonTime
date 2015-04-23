@@ -1,8 +1,5 @@
 #include "Level.h"
 
-Inventory::Inventory() {
-}
-
 Inventory::Inventory(uint64_t slots) {
 	for(uint64_t i = 0; i < slots; i ++)
 		items.push_back(std::unique_ptr<Item>());
@@ -30,6 +27,25 @@ void Inventory::setItemInSlot(Item* item, uint64_t slot) {
 
 Item* Inventory::getItemInSlot(uint64_t slot) const {
 	return items[slot].get();
+}
+
+uint64_t Inventory::getFilledSlotsCount() const {
+	int count = 0;
+	for(size_t i = 0; i < items.size(); ++i) {
+		auto item = items[i].get();
+		if(item)
+			count++;
+	}
+	return count;
+}
+
+void Inventory::printFilledSlots() const {
+	for(size_t i = 0; i < items.size(); ++i) {
+		auto item = items[i].get();
+		if(item)
+			Message::push("Item in inv: " + item->getDescription());
+	}
+	return;
 }
 
 Weapon::Weapon(WeaponType _type) :type(_type) {

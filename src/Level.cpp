@@ -196,7 +196,6 @@ void Level::generateRandom() {
 	srand(time(NULL));
 	int roomNum = 30;
 	int maxTries = 5000;
-	/*
 	while(roomNum>0) {
 		if (maxTries == 0)
 			break;
@@ -221,11 +220,6 @@ void Level::generateRandom() {
 			roomNum--;
 		}
 	}
-	*/
-	generateRectRoom(0,8,15,8);
-	generateRectRoom(30,0,15,8);
-	generateRectRoom(50,8,15,8);
-	generateRectRoom(30,15,15,8);
 	
 	if(rooms.size() >= 2) {
 		for(int i = 0; i < rooms.size()-1;) {
@@ -238,15 +232,25 @@ void Level::generateRandom() {
 					int Xstop = std::min(room1->posX+room1->width,room2->posX+room2->width);
 					int Xmid = (Xstart+Xstop)/2;
 					if(room1->posY+room1->height < room2->posY) {
-						generateYCorridor(Xmid, room1->posY+room1->height-1, 3, room2->posY - (room1->posY+room1->height)+2);
-					}
-					else {
-						generateYCorridor(Xmid, room2->posY+room2->height-1, 3, room1->posY - (room2->posY+room2->height)+2);
+						bool overlap = false;
+						int corX = Xmid;
+						int corY = room1->posY+room1->height-1;
+						int corW = 3;
+						int corH = room2->posY - (room1->posY+room1->height)+2;
+						for(int k = 0; k < rooms.size(); ++k) {
+							auto testedRoom = rooms[k].get();
+							if (testedRoom != room1 && testedRoom != room2) {
+								if(testedRoom->posX < corX+corW && testedRoom->posX+testedRoom->width > corX &&
+									testedRoom->posY < corY+corH && testedRoom->posY+testedRoom->height > corY)
+									overlap = true;
+							}
+						}
+						if (!overlap)
+							generateYCorridor(corX, corY, corW, corH);
 					}
 				}
-					
-				else {
 
+				else {
 					if(room1->posY < room2->posY+room2->height-4 && room1->posY+room1->height-4 > room2->posY) { //Y-Overlap
 						Message::push("Overlap");
 						int Ystart = std::max(room1->posY,room2->posY);
@@ -267,10 +271,7 @@ void Level::generateRandom() {
 								}
 							}
 							if(!overlap)
-								generateXCorridor(room1->posX+room1->width-1, Ymid, room2->posX - (room1->posX+room1->width)+2, 3);
-						}
-						else {
-							//generateXCorridor(room2->posX+room2->width-1, Ymid, room1->posX - (room2->posX+room2->width)+2, 3);
+								generateXCorridor(corX, corY, corW, corH);
 						}
 					}
 				}

@@ -1,5 +1,4 @@
 #include "Level.h"
-#include "Random.h"
 
 std::unique_ptr<Level> level;
 LivingEntity* hero;
@@ -72,12 +71,19 @@ void Level::setBackgroundAt(uint64_t posX, uint64_t posY, uint8_t type) {
 
 void Level::fillBackgroundRow(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type) {
 	for(uint64_t x = posX; x < posX+length; ++x)
-		setBackgroundAt(x, posY, type);
+		if(getBackgroundAt(x, posY) != BACKGROUD_FLOOR)
+			setBackgroundAt(x, posY, type);
+		else
+			setBackgroundAt(x, posY, BACKGROUD_FLOOR);
+
 }
 
 void Level::fillBackgroundColumn(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type) {
 	for(uint64_t y = posY; y < posY+length; ++y)
-		setBackgroundAt(posX, y, type);
+		if(getBackgroundAt(posX, y)!= BACKGROUD_FLOOR)
+			setBackgroundAt(posX, y, type);
+		else
+			setBackgroundAt(posX, y, BACKGROUD_FLOOR);
 }
 
 void Level::fillBackgroundRect(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, uint8_t type) {
@@ -177,17 +183,26 @@ void Level::generateOther() {
 	memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
 }
 
+bool xOverlap(int x1, int x2, int x3, int x4) {
+	return (x1 < x4 && x2 > x3);
+}
+
+bool yOverlap(int y1, int y2, int y3, int y4) {
+	return (y1 < y4 && y2 > y3);
+}
+
 void Level::generateRandom() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
 	srand(time(NULL));
 	int roomNum = 30;
 	int maxTries = 5000;
+	/*
 	while(roomNum>0) {
 		if (maxTries == 0)
 			break;
 		maxTries--;
 		bool collide = false;
-		uint64_t w = 8 + (rand()+maxTries) % 12;
+		uint64_t w = 10 + (rand()+maxTries) % 12;
 		maxTries--;
 		uint64_t h = 5 + (rand()+maxTries) % 10;
 		maxTries--;
@@ -206,6 +221,11 @@ void Level::generateRandom() {
 			roomNum--;
 		}
 	}
+	*/
+	generateRectRoom(0,8,15,8);
+	generateRectRoom(30,0,15,8);
+	generateRectRoom(50,8,15,8);
+	generateRectRoom(30,15,15,8);
 	
 	if(rooms.size() >= 2) {
 		for(int i = 0; i < rooms.size()-1;) {
@@ -217,7 +237,7 @@ void Level::generateRandom() {
 					int Xstart = std::max(room1->posX,room2->posX);
 					int Xstop = std::min(room1->posX+room1->width,room2->posX+room2->width);
 					int Xmid = (Xstart+Xstop)/2;
-					if(room1->posY+room1->height < room2->posY) {//+room2->height) {
+					if(room1->posY+room1->height < room2->posY) {
 						generateYCorridor(Xmid, room1->posY+room1->height-1, 3, room2->posY - (room1->posY+room1->height)+2);
 					}
 					else {
@@ -227,16 +247,30 @@ void Level::generateRandom() {
 					
 				else {
 
-					if(room1->posY < room2->posY+room2->height-3 && room1->posY+room1->height-3 > room2->posY) { //Y-Overlap
+					if(room1->posY < room2->posY+room2->height-4 && room1->posY+room1->height-4 > room2->posY) { //Y-Overlap
 						Message::push("Overlap");
 						int Ystart = std::max(room1->posY,room2->posY);
 						int Ystop = std::min(room1->posY+room1->height,room2->posY+room2->height);
 						int Ymid = (Ystart+Ystop)/2;
-						if(room1->posX+room1->width < room2->posX) { //+room2->width) {
-							generateXCorridor(room1->posX+room1->width-1, Ymid, room2->posX - (room1->posX+room1->width)+2, 3);
+						if(room1->posX+room1->width < room2->posX) {
+							bool overlap = false;
+							int corX = room1->posX+room1->width-1;
+							int corY = Ymid;
+							int corW = room2->posX - (room1->posX+room1->width)+2;
+							int corH = 3;
+							for(int k = 0; k < rooms.size(); ++k) {
+								auto testedRoom = rooms[k].get();
+								if (testedRoom != room1 && testedRoom != room2) {
+									if(testedRoom->posX < corX+corW && testedRoom->posX+testedRoom->width > corX &&
+										testedRoom->posY < corY+corH && testedRoom->posY+testedRoom->height > corY)
+										overlap = true;
+								}
+							}
+							if(!overlap)
+								generateXCorridor(room1->posX+room1->width-1, Ymid, room2->posX - (room1->posX+room1->width)+2, 3);
 						}
 						else {
-							generateXCorridor(room2->posX+room2->width-1, Ymid, room1->posX - (room2->posX+room2->width)+2, 3);
+							//generateXCorridor(room2->posX+room2->width-1, Ymid, room1->posX - (room2->posX+room2->width)+2, 3);
 						}
 					}
 				}
@@ -246,3 +280,4 @@ void Level::generateRandom() {
 		}
 	}
 }
+

@@ -8,11 +8,14 @@
 #define BACKGROUD_CLOSED_DOOR '+'
 #define BACKGROUD_CORRIDOR '#'
 
+class Room;
+
 class Level {
 	public:
 	uint64_t width, height;
 	std::unique_ptr<uint8_t> background;
 	std::vector<std::unique_ptr<Entity>> entities;
+	std::vector<std::unique_ptr<Room>> rooms;
 	Level();
 	~Level();
 	void doFrame();
@@ -32,6 +35,15 @@ class Level {
 	void generateXCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
 	void generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
 	void generate();
+	void generateOther();
+	void generateRandom();
+};
+
+class Room {
+	public:
+	uint64_t posX, posY;
+	uint64_t width, height;
+	Room(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height);
 };
 
 extern std::unique_ptr<Level> level;

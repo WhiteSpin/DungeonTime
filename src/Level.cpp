@@ -1,15 +1,21 @@
 #include "Level.h"
+#include "Random.h"
 
 std::unique_ptr<Level> level;
 LivingEntity* hero;
 
 Level::Level() :width(75), height(25), background((uint8_t*)malloc(width * height)) {
-	generate();
+	
 }
 
 Level::~Level() {
 
 }
+
+
+Room::Room(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _height):
+	posX(_posX), posY(_posY), width(_width), height(_height) {
+	}
 
 void Level::doFrame() {
 	uint64_t maxX = std::min(width, (uint64_t)System::screenSize.ws_col),
@@ -22,8 +28,7 @@ void Level::doFrame() {
 				entity->doFrame();
 			else
 				fwrite(background.get()+y*width+x, 1, 1, stdout);
-		}
-	}
+		} }
 }
 
 Entity* Level::getPrimeEntityAt(uint64_t posX, uint64_t posY) const {
@@ -129,6 +134,7 @@ void Level::generateRectRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t 
 	fillBackgroundColumn(posX, posY+1, h-2, BACKGROUD_WALLY);
 	fillBackgroundColumn(posX+w-1, posY+1, h-2, BACKGROUD_WALLY);
 	fillBackgroundRect(posX+1, posY+1, w-2, h-2, BACKGROUD_FLOOR);
+	rooms.push_back(std::unique_ptr<Room>(new Room(posX, posY, w, h)));
 }
 
 void Level::generateXSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
@@ -160,5 +166,83 @@ void Level::generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t
 void Level::generate() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
 	generateXSplitRoom(width/2, height/2, width/4+1, height/4+1);
+	generateRectRoom(width/2+5, height/2+5, 10, 10);
 	memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
+}
+
+void Level::generateOther() {
+	memset(background.get(), BACKGROUD_EMPTY, width * height);
+	generateXSplitRoom(7, 7, width/4+1, height/4+1);
+	generateYSplitRoom(width/2+10, height/2+10, width/4+1, height/4+1);
+	memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
+}
+
+void Level::generateRandom() {
+	memset(background.get(), BACKGROUD_EMPTY, width * height);
+	srand(time(NULL));
+	int roomNum = 30;
+	int maxTries = 5000;
+	while(roomNum>0) {
+		if (maxTries == 0)
+			break;
+		maxTries--;
+		bool collide = false;
+		uint64_t w = 8 + (rand()+maxTries) % 12;
+		maxTries--;
+		uint64_t h = 5 + (rand()+maxTries) % 10;
+		maxTries--;
+		uint64_t posX = ((rand()+maxTries) % (width-w));	
+		maxTries--;
+		uint64_t posY = ((rand()+maxTries) % (height-h));	
+		for(int i = 0; i < rooms.size(); ++i) {
+			auto room = rooms[i].get();
+			if(posX < room->posX+room->width+2 && posX+width+2 > room->posX &&
+			posY < room->posY+room->height+2 && posY+height+2 > room->posY) {
+				collide = true;
+			}
+		}
+		if(!collide) {
+			generateRectRoom(posX, posY, w, h);		
+			roomNum--;
+		}
+	}
+	
+	if(rooms.size() >= 2) {
+		for(int i = 0; i < rooms.size()-1;) {
+			for(int j = i+1; j < rooms.size();) { 
+				auto room1 = rooms[i].get();
+				auto room2 = rooms[j].get();
+				if(room1->posX < room2->posX+room2->width-3 && room1->posX+room1->width-3 > room2->posX) { //X-Overlap
+					Message::push("Overlap");
+					int Xstart = std::max(room1->posX,room2->posX);
+					int Xstop = std::min(room1->posX+room1->width,room2->posX+room2->width);
+					int Xmid = (Xstart+Xstop)/2;
+					if(room1->posY+room1->height < room2->posY) {//+room2->height) {
+						generateYCorridor(Xmid, room1->posY+room1->height-1, 3, room2->posY - (room1->posY+room1->height)+2);
+					}
+					else {
+						generateYCorridor(Xmid, room2->posY+room2->height-1, 3, room1->posY - (room2->posY+room2->height)+2);
+					}
+				}
+					
+				else {
+
+					if(room1->posY < room2->posY+room2->height-3 && room1->posY+room1->height-3 > room2->posY) { //Y-Overlap
+						Message::push("Overlap");
+						int Ystart = std::max(room1->posY,room2->posY);
+						int Ystop = std::min(room1->posY+room1->height,room2->posY+room2->height);
+						int Ymid = (Ystart+Ystop)/2;
+						if(room1->posX+room1->width < room2->posX) { //+room2->width) {
+							generateXCorridor(room1->posX+room1->width-1, Ymid, room2->posX - (room1->posX+room1->width)+2, 3);
+						}
+						else {
+							generateXCorridor(room2->posX+room2->width-1, Ymid, room1->posX - (room2->posX+room2->width)+2, 3);
+						}
+					}
+				}
+			++j;
+			}
+		++i;
+		}
+	}
 }

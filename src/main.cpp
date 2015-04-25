@@ -2,10 +2,14 @@
 
 int main(int argc, const char** argv) {
 	System::init();
-	level.reset(new Level());
-	level->generateRandom();
-
-	hero = new Human(level.get(), level->width/2+1, level->height/2+1);
+	int roomNum = 0;
+	while(roomNum < 3) {
+		level.reset(new Level());
+		roomNum = level->rooms.size();
+	}
+	int roomIndex = rand() % level->rooms.size();
+	auto heroRoom = level->rooms[roomIndex].get();
+	hero = new Human(level.get(), heroRoom->posX+2, heroRoom->posY+2);
 	hero->name = "The Chosen One";
 	hero->inventory->setItemInSlot(new Weapon(Weapon::WeaponType::Axe), 0);
 

@@ -9,6 +9,7 @@
 #define BACKGROUD_CORRIDOR '#'
 
 class Room;
+class Corridor;
 
 class Level {
 	public:
@@ -16,6 +17,7 @@ class Level {
 	std::unique_ptr<uint8_t> background;
 	std::vector<std::unique_ptr<Entity>> entities;
 	std::vector<std::unique_ptr<Room>> rooms;
+	std::vector<std::unique_ptr<Corridor>> corridors;
 	Level();
 	~Level();
 	void doFrame();
@@ -29,21 +31,41 @@ class Level {
 	void fillBackgroundRect(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, uint8_t type);
 	void generateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY, uint8_t type);
 	void generateEllipseRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
-	void generateRectRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
+	void generateRectRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, bool isPart = false);
 	void generateXSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
 	void generateYSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
 	void generateXCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
 	void generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
 	void generate();
-	void generateOther();
 	void generateRandom();
+	void generateRooms();
+	void generateConnections();
 };
 
 class Room {
 	public:
+	enum RoomType {
+		EllipseRoom,
+		RectRoom,
+		XSplitRoom,
+		YSplitRoom,	
+	} type;
+	Room(RoomType type);
 	uint64_t posX, posY;
 	uint64_t width, height;
-	Room(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height);
+	Room(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height, RoomType type);
+};
+
+class Corridor {
+	public:
+	enum CorridorType {
+		YCorridor,
+		XCorridor
+	} type;
+	Corridor(CorridorType type);
+	uint64_t posX, posY;
+	uint64_t width, height;
+	Corridor(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height, CorridorType type);
 };
 
 extern std::unique_ptr<Level> level;

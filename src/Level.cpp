@@ -187,9 +187,11 @@ void Level::generate() {
 
 void Level::generateRooms() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
-	srand(time(NULL));
-	int roomNum = 30;
+	int roomNum = 10;
 	int maxTries = 5000;
+	timeval t1;
+	gettimeofday(&t1, NULL);
+	srand(t1.tv_usec * t1.tv_sec);
 	while(roomNum>0) {
 		if (maxTries == 0)
 			break;
@@ -204,19 +206,34 @@ void Level::generateRooms() {
 		uint64_t posY = ((rand()+maxTries) % (height-h));	
 		for(int i = 0; i < rooms.size(); ++i) {
 			auto room = rooms[i].get();
-			if(posX < room->posX+room->width+2 && posX+width+2 > room->posX &&
-			posY < room->posY+room->height+2 && posY+height+2 > room->posY) {
+			if((posX < room->posX+room->width+2 && posX+width+2 > room->posX &&
+				posY < room->posY+room->height+2 && posY+height+2 > room->posY) ||
+				(posX == room->posX && posY == room->posY)) {
 				collide = true;
+				break;
 			}
 		}
 		if(!collide) {
-			int roomT = rand() % 10;
-			if(roomT==1 && w>6)
-				generateXSplitRoom(posX, posY, w, h);		
-			if(roomT==2 && h>8)
-				generateYSplitRoom(posX, posY, w, h);		
-			else
+			int roomT = rand() % 13;
+			switch(roomT) {
+			case 0:
+			case 1:
+				if(w>12)
+					generateXSplitRoom(posX, posY, w, h);		
+				else
+					generateRectRoom(posX, posY, w,	h);
+				break;
+			case 2:
+			case 3:
+				if(h>8)
+					generateYSplitRoom(posX, posY, w, h);		
+				else
+					generateRectRoom(posX, posY, w,	h);
+				break;
+			default:
 				generateRectRoom(posX, posY, w,	h);
+				break;
+			}
 			roomNum--;
 		}
 	}
@@ -240,6 +257,7 @@ void Level::generateConnections() {
 					for(int k = 0; k < rooms.size(); ++k) {
 						auto testedRoom = rooms[k].get();
 						if (testedRoom != room1 && testedRoom != room2) {
+							//Message::push(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(k));
 							if(testedRoom->posX < corX+corW && testedRoom->posX+testedRoom->width > corX &&
 								testedRoom->posY < corY+corH && testedRoom->posY+testedRoom->height > corY)
 								overlap = true;
@@ -266,7 +284,7 @@ void Level::generateConnections() {
 							}
 						}
 						if(!overlap)
-								generateXCorridor(corX, corY, corW, corH);
+							generateXCorridor(corX, corY, corW, corH);
 					}
 				}
 			++j;

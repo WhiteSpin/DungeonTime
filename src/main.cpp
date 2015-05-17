@@ -3,7 +3,7 @@
 int main(int argc, const char** argv) {
 	System::init();
 	int roomNum = 0;
-	while(roomNum < 5) {
+	while(roomNum < 5) { 
 		level.reset(new Level());
 		roomNum = level->rooms.size();
 	}
@@ -14,7 +14,8 @@ int main(int argc, const char** argv) {
 	hero->name = "The Chosen One";
 	hero->inventory->setItemInSlot(new Weapon(Weapon::WeaponType::Axe), 0);
 
-	/*auto otherGuy = new Human(level.get(), level->width/2+3, level->height/2+2);
+	/*
+	auto otherGuy = new Human(level.get(), level->width/2+3, level->height/2+2);
 	otherGuy->name = "The Other One";
 	otherGuy->friendly = false;
 
@@ -31,6 +32,7 @@ int main(int argc, const char** argv) {
 	inv->setItemInSlot(new Weapon(Weapon::WeaponType::Bow),1);
 	auto container = new ItemContainer(level.get(), otherGuy->posX, otherGuy->posY, std::unique_ptr<Inventory>(inv));
 	*/
+	
 
 	Controls::init();
 	while(true) {

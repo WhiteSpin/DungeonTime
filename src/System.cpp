@@ -65,6 +65,27 @@ void System::renderRightAlignedText(uint64_t row, const char* text) {
 		fwrite(text, 1, len, stdout);
 }
 
+void System::initializeLog() {
+	std::ofstream ofs;
+	ofs.open("../logfile.log", std::ofstream::out | std::ofstream::app);
+	ofs << "----------------------" << '\n';
+	ofs.close();
+}
+
+void System::writeToLog(const std::string &str) {
+	std::ofstream ofs;
+	ofs.open("../logfile.log", std::ofstream::out | std::ofstream::app);
+	ofs << str << '\n';
+	ofs.close();
+}
+
+void System::writeToLog(const char *str) {
+	std::ofstream ofs;
+	ofs.open("../logfile.log", std::ofstream::out | std::ofstream::app);
+	ofs << str << '\n';
+	ofs.close();
+}
+
 uint64_t System::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {
 	fd_set readset;
 	struct timeval tv;

@@ -5,13 +5,18 @@
 #include <unistd.h>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <memory>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <time.h>
-#include "netLink.h"
+#include "netLink.h" 
 
 class Item;
 class Level;
+
+void initializeLog();
+void writeToLog(const std::string &str);
+void writeToLog(const char *str);

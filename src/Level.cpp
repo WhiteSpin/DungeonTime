@@ -11,13 +11,20 @@ Level::~Level() {
 
 }
 
+LevelElement::LevelElement(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _height):
+	posX(_posX), posY(_posY), width(_width), height(_height) {
+	}
+
 Room::Room(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _height, RoomType _type):
-	posX(_posX), posY(_posY), width(_width), height(_height), type(_type) {
+	LevelElement(_posX, _posY, _width, _height),
+	type(_type) {
 	}
 
 Corridor::Corridor(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _height, CorridorType _type):
-	posX(_posX), posY(_posY), width(_width), height(_height), type(_type) {
+	LevelElement(_posX, _posY, _width, _height),
+	type(_type) {
 	}
+
 
 void Level::doFrame() {
 	uint64_t maxX = std::min(width, (uint64_t)System::screenSize.ws_col),
@@ -188,7 +195,7 @@ void Level::generate() {
 void Level::generateRooms() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
 	int roomNum = 10;
-	int maxTries = 5000;
+	int maxTries = 50;
 	timeval t1;
 	gettimeofday(&t1, NULL);
 	srand(t1.tv_usec * t1.tv_sec);
@@ -256,7 +263,6 @@ void Level::generateConnections() {
 					for(int k = 0; k < rooms.size(); ++k) {
 						auto testedRoom = rooms[k].get();
 						if (testedRoom != room1 && testedRoom != room2) {
-							//Message::push(std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(k));
 							if(testedRoom->posX < corX+corW && testedRoom->posX+testedRoom->width > corX &&
 								testedRoom->posY < corY+corH && testedRoom->posY+testedRoom->height > corY)
 								overlap = true;
@@ -264,10 +270,11 @@ void Level::generateConnections() {
 					}
 					if (!overlap)
 						generateYCorridor(corX, corY, corW, corH);
-				} else {
+				}else{
 
 					if(room1->posY+2 < room2->posY+room2->height-2 && room1->posY+room1->height-2 > room2->posY+2) { //Y-Overlap
-						int Ystart = std::max(room1->posY,room2->posY); int Ystop = std::min(room1->posY+room1->height,room2->posY+room2->height);
+						int Ystart = std::max(room1->posY,room2->posY);
+						int Ystop = std::min(room1->posY+room1->height,room2->posY+room2->height);
 						int Ymid = (Ystart+Ystop)/2;
 						bool overlap = false;
 						int corX = room1->posX+room1->width-1;
@@ -293,10 +300,7 @@ void Level::generateConnections() {
 	}
 }
 
-
 void Level::generateRandom() {
 	generateRooms();
 	generateConnections();
 }
-
-

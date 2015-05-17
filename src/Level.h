@@ -10,6 +10,7 @@
 
 class Room;
 class Corridor;
+class LevelElement;
 
 class Level {
 	public:
@@ -18,6 +19,7 @@ class Level {
 	std::vector<std::unique_ptr<Entity>> entities;
 	std::vector<std::unique_ptr<Room>> rooms;
 	std::vector<std::unique_ptr<Corridor>> corridors;
+	std::vector<std::unique_ptr<LevelElement>> levelElements;
 	Level();
 	~Level();
 	void doFrame();
@@ -42,7 +44,15 @@ class Level {
 	void generateConnections();
 };
 
-class Room {
+class LevelElement {
+	public:
+	uint64_t posX, posY;
+	uint64_t width, height;
+	LevelElement(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height);
+	static bool checkCollision(LevelElement* a, LevelElement* b);
+};
+
+class Room : public LevelElement{
 	public:
 	enum RoomType {
 		EllipseRoom,
@@ -50,23 +60,19 @@ class Room {
 		XSplitRoom,
 		YSplitRoom,	
 	} type;
-	Room(RoomType type);
-	uint64_t posX, posY;
-	uint64_t width, height;
 	Room(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height, RoomType type);
 };
 
-class Corridor {
+class Corridor : public LevelElement {
 	public:
 	enum CorridorType {
 		YCorridor,
 		XCorridor
 	} type;
-	Corridor(CorridorType type);
-	uint64_t posX, posY;
-	uint64_t width, height;
+	std::vector<std::unique_ptr<LevelElement>> connects;
 	Corridor(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height, CorridorType type);
 };
+
 
 extern std::unique_ptr<Level> level;
 extern LivingEntity* hero;

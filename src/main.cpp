@@ -7,6 +7,7 @@ int main(int argc, const char** argv) {
 		level.reset(new Level());
 		roomNum = level->rooms.size();
 	}
+
 	int roomIndex = rand() % level->rooms.size();
 	auto heroRoom = level->rooms[roomIndex].get();
 	hero = new Human(level.get(), heroRoom->posX+2, heroRoom->posY+2);

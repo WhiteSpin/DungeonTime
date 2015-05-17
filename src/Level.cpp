@@ -197,13 +197,12 @@ void Level::generateRooms() {
 			break;
 		maxTries--;
 		bool collide = false;
-		uint64_t w = 10 + (rand()+maxTries) % 12;
-		maxTries--;
-		uint64_t h = 5 + (rand()+maxTries) % 10;
-		maxTries--;
-		uint64_t posX = ((rand()+maxTries) % (width-w));	
-		maxTries--;
-		uint64_t posY = ((rand()+maxTries) % (height-h));	
+
+		uint64_t w = 10 + (rand() % 12);
+		uint64_t h = 5 + (rand() % 10);
+		uint64_t posX = (rand() % (width-w));
+		uint64_t posY = (rand() % (height-h));
+
 		for(int i = 0; i < rooms.size(); ++i) {
 			auto room = rooms[i].get();
 			if((posX < room->posX+room->width+2 && posX+width+2 > room->posX &&

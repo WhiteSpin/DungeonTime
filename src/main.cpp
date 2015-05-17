@@ -3,7 +3,7 @@
 int main(int argc, const char** argv) {
 	System::init();
 	int roomNum = 0;
-	while(roomNum < 5) { 
+	while(roomNum < 6) { 
 		level.reset(new Level());
 		roomNum = level->rooms.size();
 	}

@@ -246,6 +246,7 @@ void Level::generateRooms() {
 }
 
 void Level::generateConnections() {
+	//TODO When connecting split rooms set Corridor cords accordingly
 	if(rooms.size() >= 2) {
 		for(int i = 0; i < rooms.size()-1;) {
 			for(int j = i+1; j < rooms.size();) { 
@@ -268,6 +269,13 @@ void Level::generateConnections() {
 								overlap = true;
 						}
 					}
+					if(room1->type == Room::RoomType::XSplitRoom && (corX < room1->posX+(room1->width >> 1) && corX+corW > room1->posX+(room1->width >> 1))) {
+						overlap = true;
+					}
+					if(room2->type == Room::RoomType::XSplitRoom && (corX < room1->posX+(room1->width) && corX+corW > room1->posX+(room1->width >> 1))) {
+						overlap = true;
+					}
+
 					if (!overlap)
 						generateYCorridor(corX, corY, corW, corH);
 				}else{
@@ -289,6 +297,13 @@ void Level::generateConnections() {
 									overlap = true;
 							}
 						}
+						if(room1->type == Room::RoomType::YSplitRoom && (corY < room1->posY+(room1->height >> 1) && corY+corH > room1->posY+(room1->height >> 1))) {
+							overlap = true;
+						}
+						if(room2->type == Room::RoomType::YSplitRoom && (corY < room2->posY+(room2->height >> 1) && corY+corH > room2->posY+(room2->height >> 1))) {
+							overlap = true;
+						}
+
 						if(!overlap)
 							generateXCorridor(corX, corY, corW, corH);
 					}

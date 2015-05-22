@@ -12,6 +12,8 @@
 #include <string>
 #include <cstring>
 #include <time.h>
+#include <climits>
+#include <queue>
 #include "netLink.h" 
 
 class Item;

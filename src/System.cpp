@@ -22,6 +22,7 @@ void System::init() {
 	tcsetattr(STDIN_FILENO, TCSANOW, &aux);
 
 	lastTime = getTime();
+	initializeLog();
 }
 
 void System::terminate() {
@@ -67,22 +68,21 @@ void System::renderRightAlignedText(uint64_t row, const char* text) {
 
 void System::initializeLog() {
 	std::ofstream ofs;
-	ofs.open("../logfile.log", std::ofstream::out | std::ofstream::app);
-	ofs << "----------------------" << '\n';
+	ofs.open("../logfile.log", std::ofstream::out);
 	ofs.close();
 }
 
 void System::writeToLog(const std::string &str) {
 	std::ofstream ofs;
 	ofs.open("../logfile.log", std::ofstream::out | std::ofstream::app);
-	ofs << str << '\n';
+	ofs << str;
 	ofs.close();
 }
 
 void System::writeToLog(const char *str) {
 	std::ofstream ofs;
 	ofs.open("../logfile.log", std::ofstream::out | std::ofstream::app);
-	ofs << str << '\n';
+	ofs << str;
 	ofs.close();
 }
 

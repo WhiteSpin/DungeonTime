@@ -27,6 +27,8 @@ class Level {
 	LivingEntity* getLivingEntityAt(uint64_t posX, uint64_t posY, Entity* exceptFrom = NULL) const;
 	ItemContainer* getItemContainerAt(uint64_t posX, uint64_t posY, Entity* exceptFrom = NULL) const;
 	uint8_t getBackgroundAt(uint64_t posX, uint64_t posY) const;
+	uint16_t* getWalkable();
+	bool isWalkable(uint64_t posX, uint64_t posY);
 	void setBackgroundAt(uint64_t posX, uint64_t posY, uint8_t type);
 	void fillBackgroundRow(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type);
 	void fillBackgroundColumn(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type);
@@ -36,8 +38,8 @@ class Level {
 	void generateRectRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, bool isPart = false);
 	void generateXSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
 	void generateYSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
-	void generateXCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
-	void generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
+	void generateXCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, std::unique_ptr<LevelElement>(element1), std::unique_ptr<LevelElement>(element2));
+	void generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, std::unique_ptr<LevelElement>(element1), std::unique_ptr<LevelElement>(element2));
 	void generate();
 	void generateRandom();
 	void generateRooms();
@@ -69,7 +71,7 @@ class Corridor : public LevelElement {
 		YCorridor,
 		XCorridor
 	} type;
-	std::vector<std::unique_ptr<LevelElement>> connects;
+	std::pair<std::unique_ptr<LevelElement>,std::unique_ptr<LevelElement>> connects;
 	Corridor(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height, CorridorType type);
 };
 

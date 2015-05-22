@@ -3,7 +3,7 @@
 std::vector<std::unique_ptr<Message>> Message::list;
 
 Message::Message(const std::string& _text)
-    :lifeTime(50.0), text(_text) {
+    :lifeTime(5.0), text(_text) {
 }
 
 void Message::doFrame() {

@@ -4,7 +4,7 @@ std::unique_ptr<Level> level;
 LivingEntity* hero;
 
 Level::Level() :width(75), height(25), background((uint8_t*)malloc(width * height)) {
-	generateRandom();
+	generate();
 }
 
 Level::~Level() {
@@ -27,8 +27,8 @@ Corridor::Corridor(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _he
 
 
 void Level::doFrame() {
-	uint64_t maxX = std::min(width, (uint64_t)System::screenSize.ws_col),
-			 maxY = std::min(height, (uint64_t)System::screenSize.ws_row);
+	uint64_t maxX = std::min(width, (uint64_t)System::screenSize.ws_col);
+	uint64_t maxY = std::min(height, (uint64_t)System::screenSize.ws_row);
 	for(uint64_t y = 0; y < maxY; ++y) {
 		System::setCursorPosition(0, y);
 		for(uint64_t x = 0; x < maxX; ++x) {
@@ -47,7 +47,6 @@ Entity* Level::getPrimeEntityAt(uint64_t posX, uint64_t posY) const {
 			if(LivingEntityAtPos)
 				return LivingEntityAtPos;
 		}
-				
 	return getItemContainerAt(posX, posY);
 }
 
@@ -73,6 +72,45 @@ ItemContainer* Level::getItemContainerAt(uint64_t posX, uint64_t posY, Entity* e
 
 uint8_t Level::getBackgroundAt(uint64_t posX, uint64_t posY) const {
 	return *(background.get()+posY*width+posX);
+}
+
+uint16_t* Level::getWalkable() {
+	uint16_t* walkable = (uint16_t*)malloc(this->width*this->height*sizeof(uint16_t));
+	for(int y = 0; y < this->height; ++y) {
+		for(int x = 0; x < this->width; ++x) {
+			uint8_t backgroundAtPos = this->getBackgroundAt(x,y);
+			switch(backgroundAtPos) {
+				case BACKGROUD_FLOOR:
+				case BACKGROUD_OPEN_DOOR:
+					walkable[y*this->width+x] = 1;
+					break;
+				default:
+					walkable[y*this->width+x] = 0;
+					break;
+			}
+			if(getLivingEntityAt(x,y))
+				walkable[y*this->width+x] = 0;
+		}
+	}
+	return walkable;
+}
+
+bool Level::isWalkable(uint64_t posX, uint64_t posY) {
+	char backgroundAtPos = this->getBackgroundAt(posX, posY);
+	if(getLivingEntityAt(posX, posY))
+		return false;
+	switch(backgroundAtPos) {
+		case BACKGROUD_WALLX:
+		case BACKGROUD_WALLY:
+		case BACKGROUD_CLOSED_DOOR:
+		case BACKGROUD_EMPTY:
+		case BACKGROUD_CORRIDOR:
+			return false;
+			break;
+		default:
+			return true;
+			break;
+	}
 }
 
 void Level::setBackgroundAt(uint64_t posX, uint64_t posY, uint8_t type) {
@@ -151,16 +189,19 @@ void Level::generateRectRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t 
 	fillBackgroundColumn(posX, posY+1, h-2, BACKGROUD_WALLY);
 	fillBackgroundColumn(posX+w-1, posY+1, h-2, BACKGROUD_WALLY);
 	fillBackgroundRect(posX+1, posY+1, w-2, h-2, BACKGROUD_FLOOR);
-	if(!isPart)
-		rooms.push_back(std::unique_ptr<Room>(new Room(posX, posY, w, h, Room::RoomType::RectRoom)));
+	if(!isPart) {
+		auto newRoom = new Room(posX, posY, w, h, Room::RoomType::RectRoom);
+		rooms.push_back(std::unique_ptr<Room>(newRoom));
+	}
 }
 
 void Level::generateXSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
 	uint64_t half = w >> 1;
 	generateRectRoom(posX, posY, half+1, h, true);
 	generateRectRoom(posX+half, posY, w-half, h, true);
-	setBackgroundAt(posX+half, posY+h/2, BACKGROUD_CLOSED_DOOR);
-	rooms.push_back(std::unique_ptr<Room>(new Room(posX, posY, w, h, Room::RoomType::XSplitRoom)));
+	setBackgroundAt(posX+half, posY+h/2, BACKGROUD_FLOOR);
+	auto newRoom = new Room(posX, posY, w, h, Room::RoomType::XSplitRoom);
+	rooms.push_back(std::unique_ptr<Room>(newRoom));
 }
 
 void Level::generateYSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
@@ -168,28 +209,33 @@ void Level::generateYSplitRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_
 	generateRectRoom(posX, posY, w, half+1, true);
 	generateRectRoom(posX, posY+half, w, h-half, true);
 	setBackgroundAt(posX+w/2, posY+half, BACKGROUD_CLOSED_DOOR);
-	rooms.push_back(std::unique_ptr<Room>(new Room(posX, posY, w, h, Room::RoomType::YSplitRoom)));
+	auto newRoom = new Room(posX, posY, w, h, Room::RoomType::YSplitRoom);
+	rooms.push_back(std::unique_ptr<Room>(newRoom));
 }
 
-void Level::generateXCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
+void Level::generateXCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, std::unique_ptr<LevelElement>(element1) = NULL, std::unique_ptr<LevelElement>(element2) = NULL) {
 	fillBackgroundRow(posX, posY, w, BACKGROUD_CORRIDOR);
 	fillBackgroundRow(posX, posY+h-1, w, BACKGROUD_CORRIDOR);
 	fillBackgroundRect(posX, posY+1, w, h-2, BACKGROUD_FLOOR);
-	corridors.push_back(std::unique_ptr<Corridor>(new Corridor(posX, posY, w, h, Corridor::CorridorType::XCorridor)));
+	auto newCor = new Corridor(posX, posY, w, h, Corridor::CorridorType::XCorridor);
+	corridors.push_back(std::unique_ptr<Corridor>(newCor));
 }
 
-void Level::generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h) {
+void Level::generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, std::unique_ptr<LevelElement>(element1) = NULL, std::unique_ptr<LevelElement>(element2) = NULL) {
 	fillBackgroundColumn(posX, posY, h, BACKGROUD_CORRIDOR);
 	fillBackgroundColumn(posX+w-1, posY, h, BACKGROUD_CORRIDOR);
 	fillBackgroundRect(posX+1, posY, w-2, h, BACKGROUD_FLOOR);
-	corridors.push_back(std::unique_ptr<Corridor>(new Corridor(posX, posY, w, h, Corridor::CorridorType::YCorridor)));
+	auto newCor = new Corridor(posX, posY, w, h, Corridor::CorridorType::YCorridor);
+	corridors.push_back(std::unique_ptr<Corridor>(newCor));
 }
 
 void Level::generate() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
-	generateXSplitRoom(width/2, height/2, width/4+1, height/4+1);
-	generateRectRoom(width/2+5, height/2+5, 10, 10);
-	memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
+	generateXSplitRoom(width/2-8, height/2-8, width/4+1, height/4+1);
+	generateRectRoom(width/2, height/2, 10, 10);
+	generateYCorridor(width/2+6, height/2-4, 3, 5); //memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
+	generateRectRoom(width/2-8+width/4+1+3, height/2-12, 10, 10);
+	generateXCorridor(width/2-8+width/4, height/2-8, 5, 3);
 }
 
 void Level::generateRooms() {
@@ -225,14 +271,14 @@ void Level::generateRooms() {
 			case 0:
 			case 1:
 				if(w>12)
-					generateXSplitRoom(posX, posY, w, h);		
+					generateXSplitRoom(posX, posY, w, h);
 				else
 					generateRectRoom(posX, posY, w,	h);
 				break;
 			case 2:
 			case 3:
 				if(h>8)
-					generateYSplitRoom(posX, posY, w, h);		
+					generateYSplitRoom(posX, posY, w, h);
 				else
 					generateRectRoom(posX, posY, w,	h);
 				break;
@@ -249,7 +295,7 @@ void Level::generateConnections() {
 	//TODO When connecting split rooms set Corridor cords accordingly
 	if(rooms.size() >= 2) {
 		for(int i = 0; i < rooms.size()-1;) {
-			for(int j = i+1; j < rooms.size();) { 
+			for(int j = i+1; j < rooms.size();) {
 				auto room1 = rooms[i].get();
 				auto room2 = rooms[j].get();
 				if(room1->posX+2 < room2->posX+room2->width-2 && room1->posX+room1->width-2 > room2->posX+2) { //X-Overlap
@@ -269,15 +315,19 @@ void Level::generateConnections() {
 								overlap = true;
 						}
 					}
-					if(room1->type == Room::RoomType::XSplitRoom && (corX < room1->posX+(room1->width >> 1) && corX+corW > room1->posX+(room1->width >> 1))) {
+					if(room1->type == Room::RoomType::XSplitRoom && (corX < room1->posX+(room1->width >> 1)
+						&& corX+corW > room1->posX+(room1->width >> 1))) {
 						overlap = true;
 					}
-					if(room2->type == Room::RoomType::XSplitRoom && (corX < room1->posX+(room1->width) && corX+corW > room1->posX+(room1->width >> 1))) {
+					if(room2->type == Room::RoomType::XSplitRoom && (corX < room1->posX+(room1->width)
+						&& corX+corW > room1->posX+(room1->width >> 1))) {
 						overlap = true;
 					}
 
-					if (!overlap)
+					if (!overlap) {
 						generateYCorridor(corX, corY, corW, corH);
+						//newCor->connects = std::pair<std::unique_ptr<Room>, std::unique_ptr<Room>>(std::unique_ptr<Room>(room1),std::unique_ptr<Room>(room2));
+					}
 				}else{
 
 					if(room1->posY+2 < room2->posY+room2->height-2 && room1->posY+room1->height-2 > room2->posY+2) { //Y-Overlap
@@ -297,15 +347,19 @@ void Level::generateConnections() {
 									overlap = true;
 							}
 						}
-						if(room1->type == Room::RoomType::YSplitRoom && (corY < room1->posY+(room1->height >> 1) && corY+corH > room1->posY+(room1->height >> 1))) {
+						if(room1->type == Room::RoomType::YSplitRoom && (corY < room1->posY+(room1->height >> 1)
+							&& corY+corH > room1->posY+(room1->height >> 1))) {
 							overlap = true;
 						}
-						if(room2->type == Room::RoomType::YSplitRoom && (corY < room2->posY+(room2->height >> 1) && corY+corH > room2->posY+(room2->height >> 1))) {
+						if(room2->type == Room::RoomType::YSplitRoom && (corY < room2->posY+(room2->height >> 1)
+							&& corY+corH > room2->posY+(room2->height >> 1))) {
 							overlap = true;
 						}
 
-						if(!overlap)
+						if(!overlap) {
 							generateXCorridor(corX, corY, corW, corH);
+							//newCor->connects = std::pair<std::unique_ptr<Room>, std::unique_ptr<Room>>(std::unique_ptr<Room>(room1),std::unique_ptr<Room>(room2));
+						}
 					}
 				}
 			++j;

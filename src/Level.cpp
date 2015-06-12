@@ -74,31 +74,14 @@ uint8_t Level::getBackgroundAt(uint64_t posX, uint64_t posY) const {
 	return *(background.get()+posY*width+posX);
 }
 
-uint16_t* Level::getWalkable() {
-	uint16_t* walkable = (uint16_t*)malloc(this->width*this->height*sizeof(uint16_t));
-	for(int y = 0; y < this->height; ++y) {
-		for(int x = 0; x < this->width; ++x) {
-			uint8_t backgroundAtPos = this->getBackgroundAt(x,y);
-			switch(backgroundAtPos) {
-				case BACKGROUD_FLOOR:
-				case BACKGROUD_OPEN_DOOR:
-					walkable[y*this->width+x] = 1;
-					break;
-				default:
-					walkable[y*this->width+x] = 0;
-					break;
-			}
-			if(getLivingEntityAt(x,y))
-				walkable[y*this->width+x] = 0;
-		}
-	}
-	return walkable;
-}
-
 bool Level::isWalkable(uint64_t posX, uint64_t posY) {
-	char backgroundAtPos = this->getBackgroundAt(posX, posY);
+	if(posX > level->width || posY > level->height)
+		return false;
+
 	if(getLivingEntityAt(posX, posY))
 		return false;
+
+	char backgroundAtPos = this->getBackgroundAt(posX, posY);
 	switch(backgroundAtPos) {
 		case BACKGROUD_WALLX:
 		case BACKGROUD_WALLY:
@@ -112,6 +95,41 @@ bool Level::isWalkable(uint64_t posX, uint64_t posY) {
 			break;
 	}
 }
+
+void Level::createField(uint64_t posX, uint64_t posY, uint16_t* field) {
+	for(int x = 0; x<level->width; ++x) {
+		for(int y = 0; y<level->height; ++y) {
+			field[y*level->width+x] = UINT16_MAX;
+		}
+	}
+	field[posY*level->width+posX] = 0;
+	std::queue<std::pair<uint64_t, uint64_t>> que;
+	que.push(std::pair<uint64_t, uint64_t>(posX, posY));
+	while(!que.empty()) {
+		auto cur = que.front();
+		que.pop();
+		uint16_t distance = field[cur.second*level->width+cur.first];
+		//level->setBackgroundAt(cur.first, cur.second, '0' + distance);
+		if(level->isWalkable(cur.first+1, cur.second) && distance+1 < field[cur.second*level->width+cur.first+1]) {
+			que.push(std::pair<uint64_t, uint64_t>(cur.first+1, cur.second));
+			field[cur.second*level->width+cur.first+1] = distance+1;
+		}
+		if(level->isWalkable(cur.first, cur.second+1) && distance+1 < field[(cur.second+1)*level->width+cur.first]) {
+			que.push(std::pair<uint64_t, uint64_t>(cur.first, cur.second+1));
+			field[(cur.second+1)*level->width+cur.first] = distance+1;
+		}
+		if(level->isWalkable(cur.first-1, cur.second) && distance+1 < field[cur.second*level->width+cur.first-1]) {
+			que.push(std::pair<uint64_t, uint64_t>(cur.first-1, cur.second));
+			field[cur.second*level->width+cur.first-1] = distance+1;
+		}
+		if(level->isWalkable(cur.first, cur.second-1) && distance+1 < field[(cur.second-1)*level->width+cur.first]) {
+			que.push(std::pair<uint64_t, uint64_t>(cur.first, cur.second-1));
+			field[(cur.second-1)*level->width+cur.first] = distance+1;
+		}
+		System::writeToLog(std::to_string(que.size()) + "\n");
+	}
+}
+
 
 void Level::setBackgroundAt(uint64_t posX, uint64_t posY, uint8_t type) {
 	*(background.get()+posY*width+posX) = type;

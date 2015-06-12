@@ -12,6 +12,7 @@ class Entity {
 	virtual bool handleAction(Controls::Action input);
 };
 
+
 class LivingEntity : public Entity {
 	public:
 	int health, maxHealth;
@@ -21,8 +22,7 @@ class LivingEntity : public Entity {
 	LivingEntity(Level* level, uint64_t posX, uint64_t posY);
 	bool hurt(int damage);
 	int heal(int value);
-	void goTowards(uint64_t posX, uint64_t posY);
-	void checkSet(std::vector<std::vector<uint64_t>> &set);
+	bool goTowards(uint16_t* field);
 };
 
 class ItemContainer : public Entity {

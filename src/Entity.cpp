@@ -111,89 +111,36 @@ int LivingEntity::heal(int value) {
 	}
 }
 
-std::vector<uint64_t> NOMIN = {USHRT_MAX, USHRT_MAX, USHRT_MAX};
 
+bool LivingEntity::goTowards(uint16_t *field) {
+	uint16_t min = field[posY*level->width+posX];
+	std::pair<uint64_t, uint64_t> p;
 
-std::vector<uint64_t> getMin(uint64_t _posX, uint64_t _posY, const std::vector<std::vector<uint64_t>> &set)  {
-	std::vector<uint64_t> min = NOMIN;
-	for(auto& i : set) {
-		if(i[0] == _posX && i[1] == _posY) {
-			if(i[2] < min[2]) {
-				min = i;
-			}
-		}
+	if(field[posY*level->width+posX+1] < min) {
+		min = field[posY*level->width+posX+1];
+		p = {posX+1, posY};
 	}
-	return min;
+	if(field[(posY+1)*level->width+posX] < min) {
+		min = field[(posY+1)*level->width+posX];
+		p = {posX, posY+1};
+	}
+	if(field[posY*level->width+posX-1] < min) {
+		min = field[posY*level->width+posX-1];
+		p = {posX-1, posY};
+	}
+	if(field[(posY-1)*level->width+posX]< min) {
+		min = field[(posY-1)*level->width+posX];
+		p = {posX, posY-1};
+	}
+
+	if(min < field[posY*level->width+posX]) {
+		this->posX = p.first;
+		this->posY = p.second;
+		return true;
+	}
+	return false;
 }
 
-
-std::vector<std::vector<uint64_t>> clear(std::vector<std::vector<uint64_t>> &set) {
-	std::vector<std::vector<uint64_t>> cleanedSet;
-	for(int x = 0; x<level->width; ++x) {
-		for(int y = 0; y<level->height; ++y) {
-			if(level->isWalkable(x, y) && x < level->width && y < level->height) {
-				std::vector<uint64_t> min = getMin(x, y, set);
-				if(min != NOMIN) {
-					cleanedSet.push_back(min);
-					level->setBackgroundAt(x, y, '0'+min[2]);
-				}
-				else
-					level->setBackgroundAt(x, y, BACKGROUD_FLOOR);
-			}
-		}
-	}
-	System::writeToLog(std::to_string(set.size()) + "->" + std::to_string(cleanedSet.size()) + "\n");
-	return cleanedSet;
-}
-
-void printSet(std::vector<std::vector<uint64_t>> &set) {
-	for(auto& i : set) {
-		Message::push("PosX: " + std::to_string(i[0]) + " PosY: " + std::to_string(i[1]) + " Dis: " + std::to_string(i[2]));
-	}
-}
-
-void LivingEntity::goTowards(uint64_t _posX, uint64_t _posY) {
-	std::vector<std::vector<uint64_t>> set;
-	set.push_back({_posX, _posY, 0});
-	int i = 0;
-	while(true) {
-		if(i < set.size()){
-			auto cur = set[i];
-			set.push_back({cur[0]+1, cur[1], cur[2]+1});
-			set.push_back({cur[0], cur[1]+1, cur[2]+1});
-			set.push_back({cur[0]-1, cur[1], cur[2]+1});
-			set.push_back({cur[0], cur[1]-1, cur[2]+1});
-			//System::writeToLog(std::to_string(set.size()));
-			set = clear(set);
-			i++;
-		}
-		else {
-			checkSet(set);
-			System::writeToLog("Break\n");
-			break;
-		}
-	}
-}
-
-void LivingEntity::checkSet(std::vector<std::vector<uint64_t>> &set) {
-	std::vector<uint64_t> min = NOMIN;
-
-	for(auto& i : set) {
-		if(i[0] == posX+1 && i[1] == posY && i[2] < min[2])
-			min = i;
-		if(i[0] == posX && i[1]	== posY+1 && i[2] < min[2])
-			min = i;
-		if(i[0] == posX-1 && i[1] == posY && i[2] < min[2])
-			min = i;
-		if(i[0] == posX && i[1] == posY-1 && i[2] < min[2])
-			min = i;
-	}
-	if(min != NOMIN && level->isWalkable(min[0], min[1])) {
-		posX = min[0];
-		posY = min[1];
-		Message::push("PosX: " + std::to_string(min[0]) + " PosY: " + std::to_string(min[1]) + " Dis: " + std::to_string(min[2]));
-	}
-}
 
 ItemContainer::ItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std::unique_ptr<Inventory> _inventory)
 	:Entity(_level, _posX, _posY) {

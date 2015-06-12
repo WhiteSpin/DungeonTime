@@ -58,8 +58,11 @@ int main(int argc, const char** argv) {
 		Controls::doFrame();
 		for (auto& i : level->entities) {
 			auto livingEntityAtPos = dynamic_cast<LivingEntity*>(i.get());
-			if(livingEntityAtPos && livingEntityAtPos->name != "The Chosen One")
-				livingEntityAtPos->goTowards(hero->posX, hero->posY);
+			if(livingEntityAtPos && livingEntityAtPos->name != "The Chosen One") {
+				uint16_t field [level->width*level->height];
+				level->createField(hero->posX, hero->posY, field);
+				livingEntityAtPos->goTowards(field);
+			}
 		}
 		level->doFrame();
 		Message::doFrame();

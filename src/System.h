@@ -42,7 +42,6 @@ namespace System {
     void setCursorPosition(uint64_t posX, uint64_t posY);
     void setTextStyle();
     void renderRightAlignedText(uint64_t row, const char* text);
-    void initializeLog();
     void writeToLog(const std::string &str);
     void writeToLog(const char *str);
     uint64_t handleKeyboard(uint64_t bufferSize, uint8_t* buffer);

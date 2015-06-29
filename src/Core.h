@@ -14,11 +14,7 @@
 #include <time.h>
 #include <climits>
 #include <queue>
-#include "netLink.h" 
+#include "netLink.h"
 
 class Item;
 class Level;
-
-void initializeLog();
-void writeToLog(const std::string &str);
-void writeToLog(const char *str);

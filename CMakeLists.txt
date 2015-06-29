@@ -4,7 +4,7 @@ project(DungeonTime)
 
 aux_source_directory(src/ SOURCES)
 include_directories(netLink/include)
-link_directories(netLink/out)
+link_directories(netLink/build/out)
 add_definitions(-O3 -std=c++1y)
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} NetLink)

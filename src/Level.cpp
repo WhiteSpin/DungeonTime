@@ -97,11 +97,9 @@ bool Level::isWalkable(uint64_t posX, uint64_t posY) {
 }
 
 void Level::createField(uint64_t posX, uint64_t posY, uint16_t* field) {
-	for(int x = 0; x<level->width; ++x) {
-		for(int y = 0; y<level->height; ++y) {
-			field[y*level->width+x] = UINT16_MAX;
-		}
-	}
+	for(size_t i = 0; i < level->width*level->height; ++i)
+		field[i] = UINT16_MAX;
+
 	field[posY*level->width+posX] = 0;
 	std::queue<std::pair<uint64_t, uint64_t>> que;
 	que.push(std::pair<uint64_t, uint64_t>(posX, posY));
@@ -126,7 +124,6 @@ void Level::createField(uint64_t posX, uint64_t posY, uint16_t* field) {
 			que.push(std::pair<uint64_t, uint64_t>(cur.first, cur.second-1));
 			field[(cur.second-1)*level->width+cur.first] = distance+1;
 		}
-		System::writeToLog(std::to_string(que.size()) + "\n");
 	}
 }
 
@@ -160,9 +157,9 @@ void Level::fillBackgroundRect(uint64_t posX, uint64_t posY, uint64_t w, uint64_
 
 void Level::generateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY, uint8_t type) {
 	//Bresenham Line
-	int dx =  abs(toX-fromX), sx = fromX<toX ? 1 : -1;
-	int dy = -abs(toY-fromY), sy = fromY<toY ? 1 : -1;
-	int err = dx+dy, e2;
+	int64_t dx =  std::abs((int64_t)toX-(int64_t)fromX), sx = fromX<toX ? 1LL : -1LL;
+	int64_t dy = -std::abs((int64_t)toY-(int64_t)fromY), sy = fromY<toY ? 1LL : -1LL;
+	int64_t err = dx+dy, e2;
 
 	while(true) {
 		setBackgroundAt(fromX, fromY, type);
@@ -251,7 +248,7 @@ void Level::generate() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
 	generateXSplitRoom(width/2-8, height/2-8, width/4+1, height/4+1);
 	generateRectRoom(width/2, height/2, 10, 10);
-	generateYCorridor(width/2+6, height/2-4, 3, 5); //memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
+	generateYCorridor(width/2+6, height/2-4, 3, 5);
 	generateRectRoom(width/2-8+width/4+1+3, height/2-12, 10, 10);
 	generateXCorridor(width/2-8+width/4, height/2-8, 5, 3);
 }

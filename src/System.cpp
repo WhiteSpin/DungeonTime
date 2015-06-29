@@ -1,5 +1,6 @@
 #include "Level.h"
 
+std::ofstream logFile;
 System::TextAttribute System::textAttribute;
 System::Color System::foreground, System::background;
 double System::frameDuration, lastTime;
@@ -21,8 +22,8 @@ void System::init() {
 	aux.c_cc[VTIME] = 0;
 	tcsetattr(STDIN_FILENO, TCSANOW, &aux);
 
+	logFile.open("logfile.log", std::ofstream::out);
 	lastTime = getTime();
-	initializeLog();
 }
 
 void System::terminate() {
@@ -66,24 +67,12 @@ void System::renderRightAlignedText(uint64_t row, const char* text) {
 		fwrite(text, 1, len, stdout);
 }
 
-void System::initializeLog() {
-	std::ofstream ofs;
-	ofs.open("../logfile.log", std::ofstream::out);
-	ofs.close();
-}
-
 void System::writeToLog(const std::string &str) {
-	std::ofstream ofs;
-	ofs.open("../logfile.log", std::ofstream::out | std::ofstream::app);
-	ofs << str;
-	ofs.close();
+	logFile << str;
 }
 
 void System::writeToLog(const char *str) {
-	std::ofstream ofs;
-	ofs.open("../logfile.log", std::ofstream::out | std::ofstream::app);
-	ofs << str;
-	ofs.close();
+	logFile << str;
 }
 
 uint64_t System::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {

@@ -4,7 +4,7 @@ std::unique_ptr<Level> level;
 LivingEntity* hero;
 
 Level::Level() :width(75), height(25), background((uint8_t*)malloc(width * height)) {
-	generate();
+	generateRandom();
 }
 
 Level::~Level() {
@@ -155,20 +155,29 @@ void Level::fillBackgroundRect(uint64_t posX, uint64_t posY, uint64_t w, uint64_
 			setBackgroundAt(x, y, type);
 }
 
-void Level::generateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY, uint8_t type) {
+std::vector<std::pair<uint64_t, uint64_t>> Level::calculateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY) {
 	//Bresenham Line
 	int64_t dx =  std::abs((int64_t)toX-(int64_t)fromX), sx = fromX<toX ? 1LL : -1LL;
 	int64_t dy = -std::abs((int64_t)toY-(int64_t)fromY), sy = fromY<toY ? 1LL : -1LL;
 	int64_t err = dx+dy, e2;
+	std::vector<std::pair<uint64_t, uint64_t>> path;
 
 	while(true) {
-		setBackgroundAt(fromX, fromY, type);
+		path.push_back(std::pair<uint64_t, uint64_t> (fromX, fromY));
 		if(fromX == toX && fromY == toY)
 			break;
 
 		e2 = 2*err;
 		if(e2 > dy) { err += dy; fromX += sx; }
 		if(e2 < dx) { err += dx; fromY += sy; }
+	}
+	return path;
+}
+
+void Level::generateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY, uint8_t type) {
+	std::vector<std::pair<uint64_t, uint64_t>> path = calculateLine(fromX, fromY, toX, toY);
+	for(auto& i : path) {
+		level->setBackgroundAt(i.first, i.second, type);
 	}
 }
 
@@ -248,7 +257,8 @@ void Level::generate() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
 	generateXSplitRoom(width/2-8, height/2-8, width/4+1, height/4+1);
 	generateRectRoom(width/2, height/2, 10, 10);
-	generateYCorridor(width/2+6, height/2-4, 3, 5);
+	generateYCorridor(width/2+6, height/2-4, 3, 5); 
+	//memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
 	generateRectRoom(width/2-8+width/4+1+3, height/2-12, 10, 10);
 	generateXCorridor(width/2-8+width/4, height/2-8, 5, 3);
 }

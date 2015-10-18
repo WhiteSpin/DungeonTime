@@ -2,24 +2,24 @@
 
 int main(int argc, const char** argv) {
 	System::init();
-	/*
+	System::writeToLog("System boot");
+	Message::push("Hello");
 	int roomNum = 0;
 	while(roomNum < 6) { 
 		level.reset(new Level());
 		roomNum = level->rooms.size();
+		//System::writeToLog("Rooms " + std::to_string(roomNum) + "\n");
+	}
+	/*
+	for(auto&& i : level->corridors) {
+		System::writeToLog("Pos X: " + std::to_string(i->connects.first->posX) + "Pos Y: " + std::to_string(i->connects.first->posX) + " connected with " 
+				+ "Pos X: " + std::to_string(i->connects.second->posX) + "Pos Y: " + std::to_string(i->connects.second->posX));
 	}
 	*/
-	level.reset(new Level());
-	for(auto&& i : level->corridors) {
-		//System::writeToLog("Pos X: " + std::to_string(i->connects.first->posX) + "Pos Y: " + std::to_string(i->connects.first->posX) + " connected with " 
-		//		+ "Pos X: " + std::to_string(i->connects.second->posX) + "Pos Y: " + std::to_string(i->connects.second->posX));
-	}
 
-	/*
 	int roomIndex = rand() % level->rooms.size();
 	auto heroRoom = level->rooms[roomIndex].get();
-	*/
-	hero = new Human(level.get(), 40, 7);
+	hero = new Human(level.get(), heroRoom->posX+2, heroRoom->posY+2);
 	hero->name = "The Chosen One";
 	hero->inventory->setItemInSlot(new Weapon(Weapon::WeaponType::Axe), 0);
 	/*
@@ -62,6 +62,32 @@ int main(int argc, const char** argv) {
 				uint16_t field [level->width*level->height];
 				level->createField(hero->posX, hero->posY, field);
 				livingEntityAtPos->goTowards(field);
+			}
+			auto movingItemContainerAtPos = dynamic_cast<MovingItemContainer*>(i.get());
+			if(movingItemContainerAtPos) {
+				System::writeToLog(std::to_string(reinterpret_cast<uint64_t>(movingItemContainerAtPos)));
+				if(!movingItemContainerAtPos->path.empty()) {
+					auto newPos = *movingItemContainerAtPos->path.begin();
+					livingEntityAtPos = level->getLivingEntityAt(newPos.first, newPos.second);
+					movingItemContainerAtPos->path.erase(movingItemContainerAtPos->path.begin());
+					if(level->isWalkable(newPos.first, newPos.second)) {
+						if(livingEntityAtPos) {
+							Message::push("Hit LivingEntity");	
+						}
+						else {
+							Message::push("Set new pos");
+							movingItemContainerAtPos->posX = newPos.first;
+							movingItemContainerAtPos->posY = newPos.second;	
+							System::writeToLog("x: " + std::to_string(newPos.first) + "y: " + std::to_string(newPos.second) + "\n");
+						}
+					}
+					else {
+						movingItemContainerAtPos->land();
+					}
+				} 
+				else {
+					movingItemContainerAtPos->land();	
+				}
 			}
 		}
 		level->doFrame();

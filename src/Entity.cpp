@@ -2,8 +2,8 @@
 #include "Greetings.h"
 
 
-Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY)
-	:level(_level), posX(_posX), posY(_posY) {
+Entity::Entity(Level* _level, uint64_t _posX, uint64_t _posY, std::unique_ptr<Inventory> _inventory)
+	:level(_level), posX(_posX), posY(_posY), inventory(std::move(_inventory)) {
 	level->entities.push_back(std::unique_ptr<Entity>(this));
 }
 
@@ -55,7 +55,7 @@ bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
 		case BACKGROUD_OPEN_DOOR:
 			return true;
 		default:
-			return true;
+			return false;
 	}
 	return false;
 }
@@ -78,6 +78,12 @@ bool Entity::handleAction(Controls::Action input) {
 			if(posX < level->width-1 && tryToEnter(posX+1, posY))
 				posX ++;
 			return true;
+		case Controls::Throw: {
+			auto inv = new Inventory(1);
+			inv->setItemInSlot(new Weapon(Weapon::WeaponType::Sword), 0);
+			auto livingEntityAtPos = dynamic_cast<LivingEntity*>(this);
+			livingEntityAtPos->throwItem(std::unique_ptr<Inventory>(inv), posX+10, posY);
+			} return true;
 		default:
 			Message::push(std::string("Unknown command!"));
 			return false;
@@ -143,8 +149,7 @@ bool LivingEntity::goTowards(uint16_t *field) {
 
 
 ItemContainer::ItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std::unique_ptr<Inventory> _inventory)
-	:Entity(_level, _posX, _posY) {
-	inventory = std::move(_inventory);
+	:Entity(_level, _posX, _posY, std::move(_inventory)) {	
 
 	Entity* itemContainerAtPos = level->getItemContainerAt(posX, posY, this);
 	if(itemContainerAtPos) {
@@ -159,11 +164,31 @@ ItemContainer::ItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std:
 
 void ItemContainer::doFrame() {
 	for(size_t i = 0; i < inventory->items.size(); ++i) {
-		auto item = inventory->items[i].get();
+		auto item = inventory->getItemInSlot(i);
 		if(!item)
 			continue;
 		printf("%c", item->getApperance());
 		return;
 	}
-	//printf("%c",level->getBackgroundAt(posX,posY));
+	printf("%c",level->getBackgroundAt(posX,posY));
+}
+
+MovingItemContainer::MovingItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std::unique_ptr<Inventory> _inventory)
+	:ItemContainer(_level, _posX, _posY, std::move(_inventory)) {
+}
+
+void MovingItemContainer::land() {
+	System::writeToLog("Touchdown\n");
+	std::unique_ptr<Inventory> inv = std::move(inventory);
+	uint64_t _posX = posX;
+	uint64_t _posY = posY;
+	destroy();
+	auto itemContainer = new ItemContainer(level, _posX, _posY, std::move(inv));
+}
+
+void LivingEntity::throwItem(std::unique_ptr<Inventory> inv, uint64_t targetX, uint64_t targetY) {
+	auto path = level->calculateLine(posX, posY, targetX, targetY);
+	auto container = new MovingItemContainer(level, path.begin()->first, path.begin()->second, std::move(inv));
+	path.erase(path.begin());
+	container->path = path;
 }

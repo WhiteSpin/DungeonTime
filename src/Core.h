@@ -14,6 +14,7 @@
 #include <time.h>
 #include <climits>
 #include <queue>
+#include <signal.h>
 #include "netLink.h"
 
 class Item;

@@ -68,11 +68,12 @@ void System::renderRightAlignedText(uint64_t row, const char* text) {
 }
 
 void System::writeToLog(const std::string &str) {
-	logFile << str;
+	writeToLog(str.c_str());
 }
 
 void System::writeToLog(const char *str) {
 	logFile << str;
+	logFile.flush();
 }
 
 uint64_t System::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {

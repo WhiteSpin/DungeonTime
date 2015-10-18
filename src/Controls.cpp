@@ -121,6 +121,7 @@ void Controls::init() {
 	asciiKeyBinding['j'] = Action::Down;
 	asciiKeyBinding['l'] = Action::Right;
 	asciiKeyBinding['h'] = Action::Left;
+	asciiKeyBinding['t'] = Action::Throw;
 	asciiKeyBinding[127] = Action::Delete;
 	asciiKeyBinding[27] = Action::Cancel;
 	asciiKeyBinding[10] = Action::Confirm;
@@ -150,6 +151,9 @@ void Controls::handleInput(uint8_t* input, Action action) {
 				break;
 				case Action::Confirm:
 					mode = Mode::Command;
+				break;
+				case Action::Throw:
+					hero->handleAction(action);
 				break;
 				case Action::Cancel:
 					System::terminate();

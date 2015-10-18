@@ -7,6 +7,7 @@ namespace Controls {
 		Down,
 		Left,
 		Right,
+		Throw,
 		Delete,
 		Cancel,
 		Confirm,

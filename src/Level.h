@@ -33,6 +33,7 @@ class Level {
 	void fillBackgroundRow(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type);
 	void fillBackgroundColumn(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type);
 	void fillBackgroundRect(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, uint8_t type);
+	std::vector<std::pair<uint64_t, uint64_t>> calculateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY);
 	void generateLine(uint64_t fromX, uint64_t fromY, uint64_t toX, uint64_t toY, uint8_t type);
 	void generateEllipseRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h);
 	void generateRectRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, bool isPart = false);

@@ -178,7 +178,7 @@ MovingItemContainer::MovingItemContainer(Level* _level, uint64_t _posX, uint64_t
 }
 
 void MovingItemContainer::land() {
-	System::writeToLog("Touchdown\n");
+	//System::writeToLog("x: " + std::to_string(posX) + " y: " + std::to_string(posY) + "Touchdown\n");
 	std::unique_ptr<Inventory> inv = std::move(inventory);
 	uint64_t _posX = posX;
 	uint64_t _posY = posY;

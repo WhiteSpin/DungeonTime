@@ -2,8 +2,6 @@
 
 int main(int argc, const char** argv) {
 	System::init();
-	System::writeToLog("System boot");
-	Message::push("Hello");
 	int roomNum = 0;
 	while(roomNum < 6) { 
 		level.reset(new Level());
@@ -75,17 +73,17 @@ int main(int argc, const char** argv) {
 							Message::push("Hit LivingEntity");	
 						}
 						else {
-							Message::push("Set new pos");
 							movingItemContainerAtPos->posX = newPos.first;
 							movingItemContainerAtPos->posY = newPos.second;	
-							System::writeToLog("x: " + std::to_string(newPos.first) + "y: " + std::to_string(newPos.second) + "\n");
+							//System::writeToLog("x: " + std::to_string(newPos.first) + "y: " + std::to_string(newPos.second) + "\n");
 						}
 					}
 					else {
 						movingItemContainerAtPos->land();
+						continue;
 					}
 				} 
-				else {
+				if(movingItemContainerAtPos->path.empty()) {
 					movingItemContainerAtPos->land();	
 				}
 			}
@@ -94,6 +92,5 @@ int main(int argc, const char** argv) {
 		Message::doFrame();
 		System::setCursorPosition(hero->posX, hero->posY);
 	}
-
 	return 0;
 }

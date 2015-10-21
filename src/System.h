@@ -44,12 +44,11 @@ namespace System {
     void renderRightAlignedText(uint64_t row, const char* text);
     void writeToLog(const std::string &str);
     void writeToLog(const char *str);
-    uint64_t handleKeyboard(uint64_t bufferSize, uint8_t* buffer);
-    bool isCSI(uint8_t* buffer);
+    bool pollKeyboard(uint64_t& bufferSize, uint8_t* buffer);
     double getTime();
     void doFrame();
 
     extern double frameDuration;
-    extern struct termios original;
+    extern struct termios termiosOld, termiosNew;
     extern struct winsize screenSize;
 };

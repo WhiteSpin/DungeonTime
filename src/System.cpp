@@ -4,45 +4,42 @@ std::ofstream logFile;
 System::TextAttribute System::textAttribute;
 System::Color System::foreground, System::background;
 double System::frameDuration, lastTime;
-struct termios System::original;
+struct termios System::termiosOld, System::termiosNew;
 struct winsize System::screenSize;
-static const char* CSI = "\33[";
+static const char* CSI = "\33["; // "\e["
 
 void System::init() {
-	tcgetattr(STDIN_FILENO, &original);
-	signal(SIGINT, (void(*)(int))System::terminate);
+	tcgetattr(STDIN_FILENO, &termiosOld);
+	tcgetattr(STDIN_FILENO, &termiosNew);
+	termiosNew.c_lflag &= ~ICANON;
+	termiosNew.c_lflag &= ~ECHO;
+	termiosNew.c_cc[VMIN] = 1;
+	termiosNew.c_cc[VTIME] = 0;
+	tcsetattr(STDIN_FILENO, TCSANOW, &termiosNew);
 	ioctl(STDIN_FILENO, TIOCGWINSZ, &screenSize);
-	eraseScreen();
-
-	struct termios aux;
-	tcgetattr(STDIN_FILENO, &aux);
-	aux.c_lflag &= ~ICANON;
-	aux.c_lflag &= ~ECHO;
-	aux.c_cc[VMIN] = 1;
-	aux.c_cc[VTIME] = 0;
-	tcsetattr(STDIN_FILENO, TCSANOW, &aux);
+	signal(SIGINT, (void(*)(int))System::terminate);
 
 	logFile.open("logfile.log", std::ofstream::out);
 	lastTime = getTime();
 }
 
 void System::terminate() {
-	eraseScreen();
 	textAttribute = ResetAll;
 	foreground = Default;
 	background = Default;
 	setTextStyle();
-	tcsetattr(0, TCSANOW, &original);
+	tcsetattr(0, TCSANOW, &termiosOld);
+	eraseScreen();
+	setCursorPosition(0, 0);
 	exit(0);
 }
 
 void System::eraseScreen() {
+	// printf("%s2J", CSI);
 	for(uint64_t y = 0; y < screenSize.ws_row; ++y) {
 		setCursorPosition(0, y);
-		for(uint64_t x = 0; x < screenSize.ws_col; ++x)
-			printf(" ");
+		printf("%s2K", CSI);
 	}
-	setCursorPosition(0, 0);
 }
 
 void System::setCursorPosition(uint64_t posX, uint64_t posY) {
@@ -76,7 +73,7 @@ void System::writeToLog(const char *str) {
 	logFile.flush();
 }
 
-uint64_t System::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {
+bool System::pollKeyboard(uint64_t& bufferSize, uint8_t* buffer) {
 	fd_set readset;
 	struct timeval tv;
 	FD_ZERO(&readset);
@@ -85,14 +82,13 @@ uint64_t System::handleKeyboard(uint64_t bufferSize, uint8_t* buffer) {
 	tv.tv_usec = 0;
 	select(STDIN_FILENO+1, &readset, NULL, NULL, &tv);
 
-	if(FD_ISSET(STDIN_FILENO, &readset))
-		return read(STDIN_FILENO, buffer, bufferSize);
-	else
-		return 0;
-}
-
-bool System::isCSI(uint8_t* buffer) {
-	return strncmp(CSI, (const char*)buffer, 2) == 0;
+	if(FD_ISSET(STDIN_FILENO, &readset)) {
+		bufferSize = read(STDIN_FILENO, buffer, bufferSize);
+		return (bufferSize > 2 && strncmp(CSI, reinterpret_cast<const char*>(buffer), 2) == 0);
+	}else{
+		bufferSize = 0;
+		return false;
+	}
 }
 
 double System::getTime() {
@@ -109,10 +105,8 @@ void System::doFrame() {
 	struct winsize newScreenSize;
 	ioctl(0, TIOCGWINSZ, &newScreenSize);
 	if(newScreenSize.ws_col != screenSize.ws_col ||
-	   newScreenSize.ws_row != screenSize.ws_row) {
-		eraseScreen();
+	   newScreenSize.ws_row != screenSize.ws_row)
 		memcpy(&screenSize, &newScreenSize, sizeof(struct winsize));
-	}
 
 	textAttribute = ResetAll;
 	foreground = White;

@@ -188,24 +188,20 @@ void Controls::doFrame() {
 
 	{
 		uint8_t buffer[32], *pos = buffer;
-		uint64_t readBytes = System::handleKeyboard(sizeof(buffer), buffer);
+		uint64_t readBytes = sizeof(buffer);
+		bool isCSI = System::pollKeyboard(readBytes, buffer);
 
-		/*pos[readBytes] = 0;
-		printf("NEXT\n");
-		for(int i = 0; i < readBytes; i ++)
-			printf("%d %x %d\n", i, pos[i], pos[i]);*/
-
-		while(readBytes) {
-			if(readBytes >= 3 && System::isCSI(pos)) {
+		while(pos < buffer+readBytes) {
+			if(isCSI) {
 				action = (Action)ansiKeyBinding[pos[2]];
 				handleInput(pos, action);
-				readBytes -= 3; pos += 3;
+				pos += 3;
 			}else{
 				if(pos[0] < 128) {
 					action = (Action)asciiKeyBinding[pos[0]];
 					handleInput(pos, action);
 				}
-				readBytes -= 1; pos += 1;
+				pos += 1;
 			}
 		}
 	}

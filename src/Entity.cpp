@@ -149,7 +149,7 @@ bool LivingEntity::goTowards(uint16_t *field) {
 
 
 ItemContainer::ItemContainer(Level* _level, uint64_t _posX, uint64_t _posY, std::unique_ptr<Inventory> _inventory)
-	:Entity(_level, _posX, _posY, std::move(_inventory)) {	
+	:Entity(_level, _posX, _posY, std::move(_inventory)) {
 
 	Entity* itemContainerAtPos = level->getItemContainerAt(posX, posY, this);
 	if(itemContainerAtPos) {
@@ -178,7 +178,6 @@ MovingItemContainer::MovingItemContainer(Level* _level, uint64_t _posX, uint64_t
 }
 
 void MovingItemContainer::land() {
-	//System::writeToLog("x: " + std::to_string(posX) + " y: " + std::to_string(posY) + "Touchdown\n");
 	std::unique_ptr<Inventory> inv = std::move(inventory);
 	uint64_t _posX = posX;
 	uint64_t _posY = posY;

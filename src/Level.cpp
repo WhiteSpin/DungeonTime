@@ -79,7 +79,7 @@ bool Level::isWalkable(uint64_t posX, uint64_t posY) {
 		return false;
 
 	if(getLivingEntityAt(posX, posY))
-		return false;
+		return true;
 
 	char backgroundAtPos = this->getBackgroundAt(posX, posY);
 	switch(backgroundAtPos) {

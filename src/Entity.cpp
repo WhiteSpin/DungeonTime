@@ -139,7 +139,7 @@ bool LivingEntity::goTowards(uint16_t *field) {
 		p = {posX, posY-1};
 	}
 
-	if(min < field[posY*level->width+posX]) {
+	if(min < field[posY*level->width+posX] && !dynamic_cast<LivingEntity*>(level->getLivingEntityAt(p.first, p.second))) {
 		this->posX = p.first;
 		this->posY = p.second;
 		return true;

@@ -6,7 +6,7 @@ System::Color System::foreground, System::background;
 double System::frameDuration, lastTime;
 struct termios System::termiosOld, System::termiosNew;
 struct winsize System::screenSize;
-static const char* CSI = "\33["; // "\e["
+const std::string CSI = "\33["; // "\e["
 
 void System::init() {
 	tcgetattr(STDIN_FILENO, &termiosOld);
@@ -34,20 +34,39 @@ void System::terminate() {
 	exit(0);
 }
 
+void System::setCursorPosition(uint64_t x, uint64_t y) {
+	std::cout << CSI << (y+1) << ';' << (x+1) << 'f';
+}
+
 void System::eraseScreen() {
-	// printf("%s2J", CSI);
+	// std::cout << CSI << "2J";
 	for(uint64_t y = 0; y < screenSize.ws_row; ++y) {
 		setCursorPosition(0, y);
-		printf("%s2K", CSI);
+        std::cout << CSI << "2K";
 	}
 }
 
-void System::setCursorPosition(uint64_t posX, uint64_t posY) {
-	printf("%s%llu;%lluf", CSI, posY+1ULL, posX+1ULL);
+void System::setTextStyle() {
+    std::cout << CSI << textAttribute << ';' << (foreground+30) << ';' << (background+40) << 'm';
 }
 
-void System::setTextStyle() {
-	printf("%s%u;%llu;%llum", CSI, textAttribute, foreground+30ULL, background+40ULL);
+void System::pollKeyboard(std::function<uint64_t(bool, uint64_t, const char*)> callback) {
+	fd_set readset;
+	struct timeval tv;
+	FD_ZERO(&readset);
+	FD_SET(STDIN_FILENO, &readset);
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	select(STDIN_FILENO+1, &readset, NULL, NULL, &tv);
+	if(FD_ISSET(STDIN_FILENO, &readset)) {
+        char buffer[16];
+        uint64_t pos = 0, readBytes = read(STDIN_FILENO, buffer, sizeof(buffer));
+        while(pos < readBytes) {
+            bool special = (readBytes-pos >= 2 && CSI.compare(0, 2, buffer+pos, 2) == 0);
+            if(special) pos += 2;
+            pos += callback(special, readBytes-pos, buffer+pos);
+        }
+	}
 }
 
 void System::renderRightAlignedText(uint64_t row, const char* text) {
@@ -71,24 +90,6 @@ void System::writeToLog(const std::string &str) {
 void System::writeToLog(const char *str) {
 	logFile << str;
 	logFile.flush();
-}
-
-bool System::pollKeyboard(uint64_t& bufferSize, uint8_t* buffer) {
-	fd_set readset;
-	struct timeval tv;
-	FD_ZERO(&readset);
-	FD_SET(STDIN_FILENO, &readset);
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-	select(STDIN_FILENO+1, &readset, NULL, NULL, &tv);
-
-	if(FD_ISSET(STDIN_FILENO, &readset)) {
-		bufferSize = read(STDIN_FILENO, buffer, bufferSize);
-		return (bufferSize > 2 && strncmp(CSI, reinterpret_cast<const char*>(buffer), 2) == 0);
-	}else{
-		bufferSize = 0;
-		return false;
-	}
 }
 
 double System::getTime() {

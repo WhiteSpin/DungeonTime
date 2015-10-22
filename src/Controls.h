@@ -24,6 +24,6 @@ namespace Controls {
 
 	void init();
 	Item* printItemSlot(char* buffer, uint64_t index);
-	void handleInput(uint8_t* input, Action action);
+	uint64_t handleInput(bool special, uint64_t size, const char* buffer);
 	void doFrame();
 };

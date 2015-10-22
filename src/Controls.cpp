@@ -139,7 +139,11 @@ void Controls::init() {
 	selection.reset(new class Selection(hero->inventory.get()));
 }
 
-void Controls::handleInput(uint8_t* input, Action action) {
+uint64_t Controls::handleInput(bool special, uint64_t size, const char* buffer) {
+	char input = *buffer;
+	Action action = (special) ?
+		(Action)ansiKeyBinding[input] :
+		(Action)asciiKeyBinding[input];
 	switch(mode) {
 		case Mode::Move:
 			switch(action) {
@@ -176,35 +180,17 @@ void Controls::handleInput(uint8_t* input, Action action) {
 					Selection::autoComplete();
 				break;
 				default:
-					inputText += input[0];
+					inputText += input;
 				break;
 			}
 		break;
 	}
+	return 1;
 }
 
 void Controls::doFrame() {
 	Action action = NotAssigned;
-
-	{
-		uint8_t buffer[32], *pos = buffer;
-		uint64_t readBytes = sizeof(buffer);
-		bool isCSI = System::pollKeyboard(readBytes, buffer);
-
-		while(pos < buffer+readBytes) {
-			if(isCSI) {
-				action = (Action)ansiKeyBinding[pos[2]];
-				handleInput(pos, action);
-				pos += 3;
-			}else{
-				if(pos[0] < 128) {
-					action = (Action)asciiKeyBinding[pos[0]];
-					handleInput(pos, action);
-				}
-				pos += 1;
-			}
-		}
-	}
+	System::pollKeyboard(Controls::handleInput);
 
 	char buffer[System::screenSize.ws_col];
 	switch(mode) {

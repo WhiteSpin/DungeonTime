@@ -3,14 +3,14 @@
 int main(int argc, const char** argv) {
 	System::init();
 	int roomNum = 0;
-	while(roomNum < 6) { 
+	while(roomNum < 6) {
 		level.reset(new Level());
 		roomNum = level->rooms.size();
 		//System::writeToLog("Rooms " + std::to_string(roomNum) + "\n");
 	}
 	/*
 	for(auto&& i : level->corridors) {
-		System::writeToLog("Pos X: " + std::to_string(i->connects.first->posX) + "Pos Y: " + std::to_string(i->connects.first->posX) + " connected with " 
+		System::writeToLog("Pos X: " + std::to_string(i->connects.first->posX) + "Pos Y: " + std::to_string(i->connects.first->posX) + " connected with "
 				+ "Pos X: " + std::to_string(i->connects.second->posX) + "Pos Y: " + std::to_string(i->connects.second->posX));
 	}
 	*/
@@ -48,7 +48,7 @@ int main(int argc, const char** argv) {
 	inv->setItemInSlot(new Weapon(Weapon::WeaponType::Bow),1);
 	auto container = new ItemContainer(level.get(), otherGuy->posX, otherGuy->posY, std::unique_ptr<Inventory>(inv));
 	*/
-	
+
 
 	Controls::init();
 	while(true) {
@@ -68,23 +68,17 @@ int main(int argc, const char** argv) {
 					auto newPos = *movingItemContainerAtPos->path.begin();
 					livingEntityAtPos = level->getLivingEntityAt(newPos.first, newPos.second);
 					movingItemContainerAtPos->path.erase(movingItemContainerAtPos->path.begin());
-					if(level->isWalkable(newPos.first, newPos.second)) {
+					if(movingItemContainerAtPos->path.empty())
+						movingItemContainerAtPos->land();
+					else if(level->isWalkable(newPos.first, newPos.second)) {
 						if(livingEntityAtPos) {
-							Message::push("Hit LivingEntity");	
-						}
-						else {
+							Message::push("Hit LivingEntity");
+						} else {
 							movingItemContainerAtPos->posX = newPos.first;
-							movingItemContainerAtPos->posY = newPos.second;	
+							movingItemContainerAtPos->posY = newPos.second;
 							//System::writeToLog("x: " + std::to_string(newPos.first) + "y: " + std::to_string(newPos.second) + "\n");
 						}
 					}
-					else {
-						movingItemContainerAtPos->land();
-						continue;
-					}
-				} 
-				if(movingItemContainerAtPos->path.empty()) {
-					movingItemContainerAtPos->land();	
 				}
 			}
 		}

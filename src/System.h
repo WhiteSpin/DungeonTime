@@ -38,13 +38,13 @@ namespace System {
 
     void init();
     void terminate();
-    void eraseScreen();
     void setCursorPosition(uint64_t posX, uint64_t posY);
+    void eraseScreen();
     void setTextStyle();
+    void pollKeyboard(std::function<uint64_t(bool, uint64_t, const char*)> callback);
     void renderRightAlignedText(uint64_t row, const char* text);
     void writeToLog(const std::string &str);
     void writeToLog(const char *str);
-    bool pollKeyboard(uint64_t& bufferSize, uint8_t* buffer);
     double getTime();
     void doFrame();
 

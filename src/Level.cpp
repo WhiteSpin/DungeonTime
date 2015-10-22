@@ -43,9 +43,10 @@ void Level::doFrame() {
 Entity* Level::getPrimeEntityAt(uint64_t posX, uint64_t posY) const {
 	for(uint64_t i = 0; i < entities.size(); ++i)
 		if(entities[i]->posX == posX && entities[i]->posY == posY) {
-			Entity* LivingEntityAtPos = dynamic_cast<LivingEntity*>(entities[i].get());
-			if(LivingEntityAtPos)
-				return LivingEntityAtPos;
+			Entity* entityAtPos = dynamic_cast<LivingEntity*>(entities[i].get());
+			if(entityAtPos) return entityAtPos;
+		 	entityAtPos = dynamic_cast<MovingItemContainer*>(entities[i].get());
+			if(entityAtPos) return entityAtPos;
 		}
 	return getItemContainerAt(posX, posY);
 }
@@ -54,7 +55,7 @@ LivingEntity* Level::getLivingEntityAt(uint64_t posX, uint64_t posY, Entity* exc
 	for(uint64_t i = 0; i < entities.size(); ++i)
 		if(entities[i]->posX == posX && entities[i]->posY == posY) {
 			auto livingEntityAtPos = dynamic_cast<LivingEntity*>(entities[i].get());
-			if (livingEntityAtPos && livingEntityAtPos != exceptFrom)
+			if(livingEntityAtPos && livingEntityAtPos != exceptFrom)
 				return livingEntityAtPos;
 		}
 	return NULL;
@@ -64,7 +65,8 @@ ItemContainer* Level::getItemContainerAt(uint64_t posX, uint64_t posY, Entity* e
 	for(uint64_t i = 0; i < entities.size(); ++i)
 		if(entities[i]->posX == posX && entities[i]->posY == posY) {
 			auto itemContainerAtPos = dynamic_cast<ItemContainer*>(entities[i].get());
-			if (itemContainerAtPos && itemContainerAtPos != exceptFrom)
+			if(dynamic_cast<MovingItemContainer*>(itemContainerAtPos)) continue;
+			if(itemContainerAtPos && itemContainerAtPos != exceptFrom)
 				return itemContainerAtPos;
 		}
 	return NULL;
@@ -257,7 +259,7 @@ void Level::generate() {
 	memset(background.get(), BACKGROUD_EMPTY, width * height);
 	generateXSplitRoom(width/2-8, height/2-8, width/4+1, height/4+1);
 	generateRectRoom(width/2, height/2, 10, 10);
-	generateYCorridor(width/2+6, height/2-4, 3, 5); 
+	generateYCorridor(width/2+6, height/2-4, 3, 5);
 	//memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
 	generateRectRoom(width/2-8+width/4+1+3, height/2-12, 10, 10);
 	generateXCorridor(width/2-8+width/4, height/2-8, 5, 3);

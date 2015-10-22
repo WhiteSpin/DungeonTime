@@ -63,22 +63,20 @@ int main(int argc, const char** argv) {
 			}
 			auto movingItemContainerAtPos = dynamic_cast<MovingItemContainer*>(i.get());
 			if(movingItemContainerAtPos) {
-				System::writeToLog(std::to_string(reinterpret_cast<uint64_t>(movingItemContainerAtPos)));
-				if(!movingItemContainerAtPos->path.empty()) {
-					auto newPos = *movingItemContainerAtPos->path.begin();
-					livingEntityAtPos = level->getLivingEntityAt(newPos.first, newPos.second);
-					movingItemContainerAtPos->path.erase(movingItemContainerAtPos->path.begin());
-					if(movingItemContainerAtPos->path.empty())
-						movingItemContainerAtPos->land();
-					else if(level->isWalkable(newPos.first, newPos.second)) {
-						if(livingEntityAtPos) {
-							Message::push("Hit LivingEntity");
-						} else {
-							movingItemContainerAtPos->posX = newPos.first;
-							movingItemContainerAtPos->posY = newPos.second;
-							//System::writeToLog("x: " + std::to_string(newPos.first) + "y: " + std::to_string(newPos.second) + "\n");
-						}
+				System::writeToLog(std::to_string(reinterpret_cast<uint64_t>(movingItemContainerAtPos))+" ");
+				auto newPos = *movingItemContainerAtPos->path.begin();
+				livingEntityAtPos = level->getLivingEntityAt(newPos.first, newPos.second);
+				movingItemContainerAtPos->path.erase(movingItemContainerAtPos->path.begin());
+				if(!movingItemContainerAtPos->path.empty() && level->isWalkable(newPos.first, newPos.second)) {
+					if(livingEntityAtPos) {
+						Message::push("Hit LivingEntity"); // TODO testing
+					} else {
+						movingItemContainerAtPos->posX = newPos.first;
+						movingItemContainerAtPos->posY = newPos.second;
+						System::writeToLog("x: " + std::to_string(newPos.first) + "y: " + std::to_string(newPos.second) + "\n"); // TODO testing
 					}
+				} else {
+					movingItemContainerAtPos->land();
 				}
 			}
 		}

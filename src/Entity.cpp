@@ -49,8 +49,7 @@ bool Entity::tryToEnter(uint64_t posX, uint64_t posY) {
 
 	switch(level->getBackgroundAt(posX, posY)) {
 		case BACKGROUD_CLOSED_DOOR:
-			level->setBackgroundAt(posX, posY, BACKGROUD_OPEN_DOOR);
-			Message::push(std::string("The door opens"));
+			return false;
 		case BACKGROUD_FLOOR:
 		case BACKGROUD_OPEN_DOOR:
 			return true;
@@ -83,6 +82,21 @@ bool Entity::handleAction(Controls::Action input) {
 			inv->setItemInSlot(new Weapon(Weapon::WeaponType::Sword), 0);
 			auto livingEntityAtPos = dynamic_cast<LivingEntity*>(this);
 			livingEntityAtPos->throwItem(std::unique_ptr<Inventory>(inv), posX+10, posY);
+			} return true;
+		case Controls::Door: {
+			auto neighbors = level->getNeighborFields(hero->posX, hero->posY);
+			for(auto& i : neighbors) {
+				if(level->getBackgroundAt(i.first, i.second) == BACKGROUD_CLOSED_DOOR) {
+					level->setBackgroundAt(i.first, i.second, BACKGROUD_OPEN_DOOR);
+					Message::push(std::string("The door opens"));
+				}
+				else {
+					if(level->getBackgroundAt(i.first, i.second) == BACKGROUD_OPEN_DOOR) {
+						level->setBackgroundAt(i.first, i.second, BACKGROUD_CLOSED_DOOR);
+						Message::push(std::string("The door closes"));
+					}
+				}
+			}
 			} return true;
 		default:
 			Message::push(std::string("Unknown command!"));

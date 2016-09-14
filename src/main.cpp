@@ -29,10 +29,11 @@ int main(int argc, const char** argv) {
 		System::writeToLog(std::to_string(walkable[i]));
 	}
 	*/
-
-	auto otherGuy = new Human(level.get(), level->width/2+3, level->height/2+2);
-	otherGuy->name = "The Other One";
-	otherGuy->friendly = false;
+	for(auto& i : level->rooms) {
+		auto otherGuy = new Human(level.get(), i->posX+3, i->posY+2);
+		otherGuy->name = "The Other One";
+		otherGuy->friendly = false;
+	}
 
 	/*
 	auto yetanotherguy = new LivingEntity(level.get(), level->width/2+2, level->height/2+4);
@@ -58,7 +59,7 @@ int main(int argc, const char** argv) {
 			auto livingEntityAtPos = dynamic_cast<LivingEntity*>(i.get());
 			if(livingEntityAtPos && livingEntityAtPos->name != "The Chosen One") {
 				uint16_t field [level->width*level->height];
-				level->createField(hero->posX, hero->posY, field);
+				level->createDistanceField(hero->posX, hero->posY, field);
 				livingEntityAtPos->goTowards(field);
 			}
 			auto movingItemContainerAtPos = dynamic_cast<MovingItemContainer*>(i.get());

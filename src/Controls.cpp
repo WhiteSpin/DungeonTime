@@ -122,6 +122,7 @@ void Controls::init() {
 	asciiKeyBinding['l'] = Action::Right;
 	asciiKeyBinding['h'] = Action::Left;
 	asciiKeyBinding['t'] = Action::Throw;
+	asciiKeyBinding['d'] = Action::Door;
 	asciiKeyBinding[127] = Action::Delete;
 	asciiKeyBinding[27] = Action::Cancel;
 	asciiKeyBinding[10] = Action::Confirm;
@@ -157,6 +158,9 @@ uint64_t Controls::handleInput(bool special, uint64_t size, const char* buffer) 
 					mode = Mode::Command;
 				break;
 				case Action::Throw:
+					hero->handleAction(action);
+				break;
+				case Action::Door:
 					hero->handleAction(action);
 				break;
 				case Action::Cancel:

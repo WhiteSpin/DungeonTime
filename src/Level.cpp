@@ -29,15 +29,29 @@ Corridor::Corridor(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _he
 void Level::doFrame() {
 	uint64_t maxX = std::min(width, (uint64_t)System::screenSize.ws_col);
 	uint64_t maxY = std::min(height, (uint64_t)System::screenSize.ws_row);
+	uint16_t field [level->width*level->height];
+	createVisibilityField(hero->posX, hero->posY, field);
+
+	std::string line;
+	for(int i=0; i < sizeof(field)/sizeof(field[0]); ++i) {
+		line += field[i];
+	}
+	System::writeToLog(line);
+
 	for(uint64_t y = 0; y < maxY; ++y) {
 		System::setCursorPosition(0, y);
 		for(uint64_t x = 0; x < maxX; ++x) {
-			auto entity = getPrimeEntityAt(x, y);
-			if(entity)
-				entity->doFrame();
+			if(Level::isVisible(x, y, field)) {
+				auto entity = getPrimeEntityAt(x, y);
+				if(entity)
+					entity->doFrame();
+				else
+					fwrite(background.get()+y*width+x, 1, 1, stdout);
+			}
 			else
-				fwrite(background.get()+y*width+x, 1, 1, stdout);
-		} }
+				fwrite(background.get()+0, 1, 1, stdout);
+		} 
+	}
 }
 
 Entity* Level::getPrimeEntityAt(uint64_t posX, uint64_t posY) const {
@@ -76,6 +90,32 @@ uint8_t Level::getBackgroundAt(uint64_t posX, uint64_t posY) const {
 	return *(background.get()+posY*width+posX);
 }
 
+std::vector<std::pair<uint64_t, uint64_t>> Level::getNeighborFields(uint64_t posX, uint64_t posY) {
+	std::vector<std::pair<uint64_t, uint64_t>> neighbors;
+	if(level->isInBounds(posX+1, posY))
+		neighbors.push_back(std::pair<uint64_t, uint64_t>(posX+1, posY));
+	if(level->isInBounds(posX, posY+1))
+		neighbors.push_back(std::pair<uint64_t, uint64_t>(posX, posY+1));
+	if(level->isInBounds(posX-1, posY))
+		neighbors.push_back(std::pair<uint64_t, uint64_t>(posX-1, posY));
+	if(level->isInBounds(posX, posY-1))
+		neighbors.push_back(std::pair<uint64_t, uint64_t>(posX, posY-1));
+
+	return neighbors;
+}
+
+bool Level::isInBounds(uint64_t posX, uint64_t posY) {
+	return posX < level->width && posY < level->height;
+}
+
+bool Level::isVisible(uint64_t posX, uint64_t posY, uint16_t* field) {
+	uint16_t val = field[posY*level->width+posX];
+	if(val != UINT16_MAX) {
+		return true;
+	}
+	return false;
+}
+
 bool Level::isWalkable(uint64_t posX, uint64_t posY) {
 	if(posX > level->width || posY > level->height)
 		return false;
@@ -98,7 +138,49 @@ bool Level::isWalkable(uint64_t posX, uint64_t posY) {
 	}
 }
 
-void Level::createField(uint64_t posX, uint64_t posY, uint16_t* field) {
+void Level::createVisibilityField(uint64_t posX, uint64_t posY, uint16_t* field) {
+	for(size_t i = 0; i < level->width*level->height; ++i)
+		field[i] = UINT16_MAX;
+
+	field[posY*level->width+posX] = 0;
+	std::queue<std::pair<uint64_t, uint64_t>> que;
+	que.push(std::pair<uint64_t, uint64_t>(posX, posY));
+	while(!que.empty()) {
+		auto cur = que.front();
+		que.pop();
+		uint16_t distance = field[cur.second*level->width+cur.first];
+	
+		if(distance+1 < field[cur.second*level->width+cur.first+1]) {
+			field[cur.second*level->width+cur.first+1] = distance+1;
+			if(level->isWalkable(cur.first+1, cur.second)) {
+				que.push(std::pair<uint64_t, uint64_t>(cur.first+1, cur.second));
+			}
+		}
+
+		if(distance+1 < field[(cur.second+1)*level->width+cur.first]) {
+			field[(cur.second+1)*level->width+cur.first] = distance+1;
+			if(level->isWalkable(cur.first, cur.second+1)) {
+				que.push(std::pair<uint64_t, uint64_t>(cur.first, cur.second+1));
+			}
+		}
+
+		if(distance+1 < field[cur.second*level->width+cur.first-1]) {
+			field[cur.second*level->width+cur.first-1] = distance+1;
+			if(level->isWalkable(cur.first-1, cur.second)) {
+				que.push(std::pair<uint64_t, uint64_t>(cur.first-1, cur.second));
+			}
+		}
+
+		if(distance+1 < field[(cur.second-1)*level->width+cur.first]) {
+			field[(cur.second-1)*level->width+cur.first] = distance+1;
+			if(level->isWalkable(cur.first, cur.second-1)) {
+				que.push(std::pair<uint64_t, uint64_t>(cur.first, cur.second-1));
+			}
+		}
+	}
+}
+
+void Level::createDistanceField(uint64_t posX, uint64_t posY, uint16_t* field) {
 	for(size_t i = 0; i < level->width*level->height; ++i)
 		field[i] = UINT16_MAX;
 
@@ -243,6 +325,7 @@ void Level::generateXCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t
 	fillBackgroundRow(posX, posY, w, BACKGROUD_CORRIDOR);
 	fillBackgroundRow(posX, posY+h-1, w, BACKGROUD_CORRIDOR);
 	fillBackgroundRect(posX, posY+1, w, h-2, BACKGROUD_FLOOR);
+	setBackgroundAt(posX, posY+1, BACKGROUD_CLOSED_DOOR);
 	auto newCor = new Corridor(posX, posY, w, h, Corridor::CorridorType::XCorridor);
 	corridors.push_back(std::unique_ptr<Corridor>(newCor));
 }
@@ -251,6 +334,7 @@ void Level::generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t
 	fillBackgroundColumn(posX, posY, h, BACKGROUD_CORRIDOR);
 	fillBackgroundColumn(posX+w-1, posY, h, BACKGROUD_CORRIDOR);
 	fillBackgroundRect(posX+1, posY, w-2, h, BACKGROUD_FLOOR);
+	setBackgroundAt(posX+1, posY, BACKGROUD_CLOSED_DOOR);
 	auto newCor = new Corridor(posX, posY, w, h, Corridor::CorridorType::YCorridor);
 	corridors.push_back(std::unique_ptr<Corridor>(newCor));
 }

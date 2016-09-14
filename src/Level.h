@@ -27,8 +27,12 @@ class Level {
 	LivingEntity* getLivingEntityAt(uint64_t posX, uint64_t posY, Entity* exceptFrom = NULL) const;
 	ItemContainer* getItemContainerAt(uint64_t posX, uint64_t posY, Entity* exceptFrom = NULL) const;
 	uint8_t getBackgroundAt(uint64_t posX, uint64_t posY) const;
+	bool isInBounds(uint64_t posX, uint64_t posY);
+	std::vector<std::pair<uint64_t, uint64_t>> getNeighborFields(uint64_t posX, uint64_t posY);
+	bool isVisible(uint64_t posX, uint64_t posY, uint16_t* field);
 	bool isWalkable(uint64_t posX, uint64_t posY);
-	void createField(uint64_t posX, uint64_t posY, uint16_t* field);
+	void createDistanceField(uint64_t posX, uint64_t posY, uint16_t* field);
+	void createVisibilityField(uint64_t posX, uint64_t posY, uint16_t* field);
 	void setBackgroundAt(uint64_t posX, uint64_t posY, uint8_t type);
 	void fillBackgroundRow(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type);
 	void fillBackgroundColumn(uint64_t posX, uint64_t posY, uint64_t length, uint8_t type);

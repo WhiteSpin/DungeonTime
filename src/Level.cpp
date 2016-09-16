@@ -2,6 +2,7 @@
 
 std::unique_ptr<Level> level;
 LivingEntity* hero;
+std::unique_ptr<Config> config;
 
 Level::Level() :width(75), height(25), background((uint8_t*)malloc(width * height)) {
 	generateRandom();
@@ -36,7 +37,6 @@ void Level::doFrame() {
 	for(int i=0; i < sizeof(field)/sizeof(field[0]); ++i) {
 		line += field[i];
 	}
-	System::writeToLog(line);
 
 	for(uint64_t y = 0; y < maxY; ++y) {
 		System::setCursorPosition(0, y);
@@ -109,6 +109,8 @@ bool Level::isInBounds(uint64_t posX, uint64_t posY) {
 }
 
 bool Level::isVisible(uint64_t posX, uint64_t posY, uint16_t* field) {
+	if(config->godMode)
+		return true;
 	uint16_t val = field[posY*level->width+posX];
 	if(val != UINT16_MAX) {
 		return true;
@@ -410,14 +412,14 @@ void Level::generateConnections() {
 				auto room1 = rooms[i].get();
 				auto room2 = rooms[j].get();
 				if(room1->posX+2 < room2->posX+room2->width-2 && room1->posX+room1->width-2 > room2->posX+2) { //X-Overlap
-					int Xstart = std::max(room1->posX,room2->posX);
-					int Xstop = std::min(room1->posX+room1->width,room2->posX+room2->width);
+					int Xstart = std::max(room1->posX, room2->posX);
+					int Xstop = std::min(room1->posX+room1->width, room2->posX+room2->width);
 					int Xmid = (Xstart+Xstop)/2;
 					bool overlap = false;
 					int corX = Xmid;
 					int corY = room1->posY+room1->height-1;
 					int corW = 3;
-					int corH = room2->posY - (room1->posY+room1->height)+2;
+					int corH = room2->posY-(room1->posY+room1->height)+2;
 					for(int k = 0; k < rooms.size(); ++k) {
 						auto testedRoom = rooms[k].get();
 						if (testedRoom != room1 && testedRoom != room2) {

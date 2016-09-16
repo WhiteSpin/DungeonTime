@@ -5,7 +5,6 @@ uint8_t asciiKeyBinding[128];
 uint8_t ansiKeyBinding[128];
 std::string inputText;
 
-
 class Selection;
 std::unique_ptr<Selection> selection;
 
@@ -123,6 +122,7 @@ void Controls::init() {
 	asciiKeyBinding['h'] = Action::Left;
 	asciiKeyBinding['t'] = Action::Throw;
 	asciiKeyBinding['d'] = Action::Door;
+	asciiKeyBinding['g'] = Action::God;
 	asciiKeyBinding[127] = Action::Delete;
 	asciiKeyBinding[27] = Action::Cancel;
 	asciiKeyBinding[10] = Action::Confirm;
@@ -145,6 +145,13 @@ uint64_t Controls::handleInput(bool special, uint64_t size, const char* buffer) 
 	Action action = (special) ?
 		(Action)ansiKeyBinding[input] :
 		(Action)asciiKeyBinding[input];
+
+	switch(action) { //Global actions independent of mode
+		case Action::God:
+			config->godMode = !(config->godMode);
+		break;
+		default:;
+	}
 	switch(mode) {
 		case Mode::Move:
 			switch(action) {

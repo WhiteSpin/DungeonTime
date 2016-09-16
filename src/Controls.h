@@ -9,6 +9,7 @@ namespace Controls {
 		Right,
 		Throw,
 		Door,
+		God,
 		Delete,
 		Cancel,
 		Confirm,

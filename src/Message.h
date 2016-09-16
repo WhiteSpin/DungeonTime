@@ -1,4 +1,4 @@
-#include "System.h"
+#include "Config.h"
 
 class Message {
     public:

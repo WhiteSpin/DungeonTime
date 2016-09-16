@@ -15,6 +15,7 @@ class LevelElement;
 class Level {
 	public:
 	uint64_t width, height;
+	bool godMode = false;
 	std::unique_ptr<uint8_t> background;
 	std::vector<std::unique_ptr<Entity>> entities;
 	std::vector<std::unique_ptr<Room>> rooms;

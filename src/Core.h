@@ -18,3 +18,4 @@
 
 class Item;
 class Level;
+class Config;

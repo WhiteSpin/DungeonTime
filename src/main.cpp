@@ -2,6 +2,7 @@
 
 int main(int argc, const char** argv) {
 	System::init();
+	config.reset(new Config());
 	int roomNum = 0;
 	while(roomNum < 6) {
 		level.reset(new Level());

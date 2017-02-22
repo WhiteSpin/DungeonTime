@@ -9,7 +9,6 @@ Level::Level() :width(75), height(25), background((uint8_t*)malloc(width * heigh
 }
 
 Level::~Level() {
-
 }
 
 LevelElement::LevelElement(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _height):
@@ -21,11 +20,20 @@ Room::Room(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _height, Ro
 	type(_type) {
 	}
 
+Room::~Room() {
+	for(auto& i : doors) {
+		//TODO free memory for doors
+	}
+}
+
 Corridor::Corridor(uint64_t _posX, uint64_t _posY, uint64_t _width, uint64_t _height, CorridorType _type):
 	LevelElement(_posX, _posY, _width, _height),
 	type(_type) {
 	}
 
+Door::Door(uint64_t _relPosX, uint64_t _relPosY, Room* _origin):
+	Door(_relPosX, _relPosY, _origin) {
+	}
 
 void Level::doFrame() {
 	uint64_t maxX = std::min(width, (uint64_t)System::screenSize.ws_col);
@@ -293,15 +301,12 @@ void Level::generateEllipseRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64
 	rooms.push_back(std::unique_ptr<Room>(new Room(posX, posY, w, h, Room::RoomType::EllipseRoom)));
 }
 
-void Level::generateRectRoom(uint64_t posX, uint64_t posY, uint64_t w, uint64_t h, bool isPart) {
-	fillBackgroundRow(posX+1, posY, w-2, BACKGROUD_WALLX);
-	fillBackgroundRow(posX+1, posY+h-1, w-2, BACKGROUD_WALLX);
-	fillBackgroundColumn(posX, posY+1, h-2, BACKGROUD_WALLY);
-	fillBackgroundColumn(posX+w-1, posY+1, h-2, BACKGROUD_WALLY);
-	fillBackgroundRect(posX+1, posY+1, w-2, h-2, BACKGROUD_FLOOR);
-	if(!isPart) {
-		auto newRoom = new Room(posX, posY, w, h, Room::RoomType::RectRoom);
-		rooms.push_back(std::unique_ptr<Room>(newRoom));
+void Level::drawRectRoom(const Room* room) {
+	fillBackgroundRow(room->posX+1, room->posY, room->width-2, BACKGROUD_WALLX);
+	fillBackgroundRow(room->posX+1, room->posY+room->height-1, room->width-2, BACKGROUD_WALLX);
+	fillBackgroundColumn(room->posX, room->posY+1, room->height-2, BACKGROUD_WALLY);
+	fillBackgroundColumn(room->posX+room->width-1, room->posY+1, room->width-2, BACKGROUD_WALLY);
+	fillBackgroundRect(room->posX+1, room->posY+1, room->width-2, room->height-2, BACKGROUD_FLOOR);
 	}
 }
 
@@ -342,13 +347,40 @@ void Level::generateYCorridor(uint64_t posX, uint64_t posY, uint64_t w, uint64_t
 }
 
 void Level::generate() {
-	memset(background.get(), BACKGROUD_EMPTY, width * height);
-	generateXSplitRoom(width/2-8, height/2-8, width/4+1, height/4+1);
-	generateRectRoom(width/2, height/2, 10, 10);
-	generateYCorridor(width/2+6, height/2-4, 3, 5);
-	//memcpy(background.get()+(height/2-2)*width+(width/2), "Welcome Hero!", 13);
-	generateRectRoom(width/2-8+width/4+1+3, height/2-12, 10, 10);
-	generateXCorridor(width/2-8+width/4, height/2-8, 5, 3);
+
+	//seed random
+	timeval t1;
+	gettimeofday(&t1, NULL);
+	srand(t1.tv_usec * t1.tv_sec);
+
+	//generate random values
+	uint64_t w = 10 + (rand() % 12);
+	uint64_t h = 5 + (rand() % 10);
+	uint64_t posX = (rand() % (width-w));
+	uint64_t posY = (rand() % (height-h));
+
+	//generate and draw new Room
+	auto newRoom = new Room(posX, posY, w, h, Room::RoomType::RectRoom);
+	drawRectRoom(newRoom);
+	auto newDoor = new Door(0, 2, newRoom);
+	rooms.push_back(std::unique_ptr<Room>(newRoom));
+
+}
+
+
+
+void Level::openDoor() {
+
+	//seed random
+	timeval t1;
+	gettimeofday(&t1, NULL);
+	srand(t1.tv_usec * t1.tv_sec);
+
+	//generate random values
+	uint64_t w = 10 + (rand() % 12);
+	uint64_t h = 5 + (rand() % 10);
+	uint64_t posX = (rand() % (width-w));
+	uint64_t posY = (rand() % (height-h));
 }
 
 void Level::generateRooms() {

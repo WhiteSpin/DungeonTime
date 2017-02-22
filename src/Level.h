@@ -1,4 +1,4 @@
-#include "Human.h"
+#include "LevelElement.h"
 
 #define BACKGROUD_EMPTY ' '
 #define BACKGROUD_FLOOR '.'
@@ -50,35 +50,6 @@ class Level {
 	void generateRandom();
 	void generateRooms();
 	void generateConnections();
-};
-
-class LevelElement {
-	public:
-	uint64_t posX, posY;
-	uint64_t width, height;
-	LevelElement(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height);
-	static bool checkCollision(LevelElement* a, LevelElement* b);
-};
-
-class Room : public LevelElement{
-	public:
-	enum RoomType {
-		EllipseRoom,
-		RectRoom,
-		XSplitRoom,
-		YSplitRoom,	
-	} type;
-	Room(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height, RoomType type);
-};
-
-class Corridor : public LevelElement {
-	public:
-	enum CorridorType {
-		YCorridor,
-		XCorridor
-	} type;
-	std::pair<std::unique_ptr<LevelElement>,std::unique_ptr<LevelElement>> connects;
-	Corridor(uint64_t posX, uint64_t posY, uint64_t width, uint64_t height, CorridorType type);
 };
 
 
